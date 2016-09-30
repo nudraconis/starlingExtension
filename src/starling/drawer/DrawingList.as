@@ -1,7 +1,7 @@
 package starling.drawer 
 {
 	import swfdata.ColorData;
-	import swfdata.atlas.ITexture;
+	import swfdata.atlas.BaseSubTexture;
 	
 	public class DrawingList 
 	{
@@ -17,7 +17,8 @@ package starling.drawer
 			data = new Vector.<Number>(registersMaxSize * 4, true);
 		}
 		
-		public function clear():void
+		[Inline]
+		public final function clear():void
 		{
 			length = 0;
 			registersSize = 0;
@@ -25,7 +26,7 @@ package starling.drawer
 		}
 		
 		[Inline]
-		public final function addDrawingData(a:Number, b:Number, c:Number, d:Number, tx:Number, ty:Number, texture:ITexture, colorData:ColorData):void
+		public final function addDrawingData(a:Number, b:Number, c:Number, d:Number, tx:Number, ty:Number, texture:BaseSubTexture, colorData:ColorData):void
 		{
 			data[length++] = a;
 			data[length++] = c;

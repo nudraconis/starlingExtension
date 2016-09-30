@@ -5,7 +5,7 @@ package swfDataExporter
 	import flash.geom.Rectangle;
 	import swfdata.ShapeData;
 	import swfdata.ShapeLibrary;
-	import swfdata.atlas.ITextureAtlas;
+	import swfdata.atlas.BaseTextureAtlas;
 	import swfdata.atlas.TextureTransform;
 	import swfdata.atlas.gl.GLSubTexture;
 	import swfdata.atlas.gl.GLTextureAtlas;
@@ -17,7 +17,7 @@ package swfDataExporter
 			
 		}
 		
-		override public function importAtlas(name:String, input:IByteArray, shapesList:ShapeLibrary, format:String):ITextureAtlas 
+		override public function importAtlas(name:String, input:IByteArray, shapesList:ShapeLibrary, format:String):BaseTextureAtlas 
 		{
 			var textureAtlas:GLTextureAtlas;
 			

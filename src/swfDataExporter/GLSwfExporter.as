@@ -2,8 +2,8 @@ package swfDataExporter
 {
 	import fastByteArray.IByteArray;
 	import swfdata.ShapeLibrary;
+	import swfdata.atlas.BaseTextureAtlas;
 	import swfdata.atlas.BitmapTextureAtlas;
-	import swfdata.atlas.ITextureAtlas;
 	import swfdata.dataTags.SwfPackerTag;
 	
 	public class GLSwfExporter 
@@ -42,13 +42,13 @@ package swfDataExporter
 			return output;
 		}
 		
-		public function importSwf(name:String, input:IByteArray, shapesList:ShapeLibrary, tagsList:Vector.<SwfPackerTag>, format:String):ITextureAtlas
+		public function importSwf(name:String, input:IByteArray, shapesList:ShapeLibrary, tagsList:Vector.<SwfPackerTag>, format:String):BaseTextureAtlas
 		{
 			input.byteArray.inflate();
 			
 			input.begin();
 			
-			var atlas:ITextureAtlas = atlasExporter.importAtlas(name, input, shapesList, format);
+			var atlas:BaseTextureAtlas = atlasExporter.importAtlas(name, input, shapesList, format);
 			
 			dataExporter.importTags(tagsList, input);
 			

@@ -3,7 +3,9 @@ package starling.drawer
 	import flash.display.BitmapData;
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DBlendFactor;
+	import flash.display3D.Context3DFillMode;
 	import flash.display3D.Context3DProgramType;
+	import flash.display3D.Context3DTriangleFace;
 	import flash.display3D.Program3D;
 	import flash.display3D.textures.Texture;
 	import flash.display3D.textures.TextureBase;
@@ -14,7 +16,7 @@ package starling.drawer
 	import starling.core.Starling;
 	import starling.display.DisplayObject;
 	import swfdata.ColorData;
-	import swfdata.atlas.ITexture;
+	import swfdata.atlas.BaseSubTexture;
 	
 	public class StarlingRenderer extends DisplayObject
 	{
@@ -30,7 +32,9 @@ package starling.drawer
 		
 		private var drawingGeometry:BatchMesh = new BatchMesh(batchSize);
 		
-		private var texturesDrawList:Vector.<ITexture> = new Vector.<ITexture>(200000, true);
+		private var fragmentData:Vector.<Number> = new <Number>[0.1, 0.1, 0.1, 0.25];
+		
+		private var texturesDrawList:Vector.<BaseSubTexture> = new Vector.<BaseSubTexture>(200000, true);
 		private var texturesListSize:int = 0;
 		
 		private var drawingList:Vector.<DrawingList> = new Vector.<DrawingList>(1000, true);
@@ -43,11 +47,11 @@ package starling.drawer
 			super();
 			
 			drawingGeometry.uploadToGpu(Starling.context);
-			Starling.current.enableErrorChecking = true;
+			Starling.current.enableErrorChecking = false;
 		}
 		
 		[Inline]
-		public final function draw(texture:ITexture, matrix:Matrix, colorData:ColorData):void
+		public final function draw(texture:BaseSubTexture, matrix:Matrix, colorData:ColorData):void
 		{
 			texturesDrawList[texturesListSize++] = texture;
 		
@@ -67,6 +71,7 @@ package starling.drawer
 				ty = ty - pivotX * b - pivotY * d;
 			}
 			
+			//TODO: менять лист ка ктолько поменяется текстура
 			var currentDrawingList:DrawingList = getDrawingList();
 			
 			if (currentDrawingList.isFull)
@@ -79,7 +84,7 @@ package starling.drawer
 		}
 		
 		[Inline]
-		private final function getDrawingList():DrawingList
+		public final function getDrawingList():DrawingList
 		{
 			var currentDrawingList:DrawingList = drawingList[drawingListSize];
 			
@@ -98,7 +103,8 @@ package starling.drawer
 			return rect;
 		}
 		
-		private function setTexture(texture:TextureBase, context3D:Context3D):void
+		[Inline]
+		public final function setTexture(texture:TextureBase, context3D:Context3D):void
 		{
 			if (currentTexture == texture)
 				return;
@@ -114,17 +120,20 @@ package starling.drawer
 			context.setBlendFactors(Context3DBlendFactor.SOURCE_ALPHA, Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA);
 			context.setProgram(getProgram());
 			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, support.mvpMatrix3D, true);
+			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, fragmentData, 1);
+			context.setCulling(Context3DTriangleFace.BACK);
 			
 			drawingGeometry.setToContext(context);
 			
 			var currentTexture:TextureBase = texturesDrawList[0].gpuData;
 			setTexture(currentTexture, context);
-			
+
+			var triangleToRegisterRate:Number = 0.5;
 			var length:int = drawingListSize + 1;
 			for (var i:int = 0; i < length; i++)
 			{	
 				var currentDrawingList:DrawingList = drawingList[i];
-				var trianglesNum:int = currentDrawingList.registersSize / 4 * 2;
+				var trianglesNum:int = currentDrawingList.registersSize * triangleToRegisterRate;
 				
 				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 4, currentDrawingList.data, currentDrawingList.registersSize);
 				context.drawTriangles(drawingGeometry.indexBuffer, 0, trianglesNum);
@@ -182,6 +191,8 @@ package starling.drawer
 					
 				fragmentShader = 	"tex 	ft0		v0			fs0	<2d, clamp, linear>	\n"	
 								+	"mul	ft0		ft0			v1						\n"
+								+	"sub	ft1		ft0			fc0						\n"
+								+	"kil	ft1.w										\n"
 								//+	"mul	ft0		ft0			fc0 		\n"
 								+	"mov	oc		ft0						  ";
 									

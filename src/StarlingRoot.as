@@ -49,8 +49,27 @@ package
 				
 			if(currentSprite is IUpdatable)
 				(currentSprite as IUpdatable).update();
-					
-			drawer.drawDisplayObject(currentSprite, transform);
+			
+			transform.tx = 1;
+			transform.ty = 1;
+			
+			var __y:Number = 0;
+			var __x:Number = 0;
+			
+			for (var i:int = 0; i < 250; i++)
+			{
+				transform.tx = __x;
+				transform.ty = __y;
+				drawer.drawDisplayObject(currentSprite, transform);
+				
+				__x += 50;
+				
+				if (__x > 800)
+				{
+					__x = 0;
+					__y += 50;
+				}
+			}
 			
 			super.render(support, parentAlpha);
 		}

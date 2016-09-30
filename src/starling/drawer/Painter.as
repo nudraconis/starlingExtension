@@ -9,8 +9,8 @@ package starling.drawer
 	import swfdata.DisplayObjectData;
 	import swfdata.Rectagon;
 	import swfdata.swfdata_inner;
-	import swfdata.atlas.ITexture;
-	import swfdata.atlas.ITextureAtlas;
+	import swfdata.atlas.BaseSubTexture;
+	import swfdata.atlas.BaseTextureAtlas;
 	import swfdata.atlas.TextureTransform;
 	import swfdrawer.IDrawer;
 	import swfdrawer.data.DrawingData;
@@ -36,7 +36,7 @@ package starling.drawer
 		private var drawingRectagon:swfdata.Rectagon;
 		
 		private var textureId:int;
-		private var currentSubTexture:ITexture;
+		private var currentSubTexture:BaseSubTexture;
 		
 		private var mousePoint:Point;
 		private var transformedMousePoint:Point = new Point();
@@ -44,7 +44,7 @@ package starling.drawer
 		private var texturePadding:Number;
 		private var texturePadding2:Number;
 		
-		protected var textureAtlas:ITextureAtlas;
+		protected var textureAtlas:BaseTextureAtlas;
 		
 		private var drawingData:DrawingData;
 		private var target:StarlingRenderer;
@@ -70,7 +70,7 @@ package starling.drawer
 		{
 			//trace('apply daraw', textureId);
 			
-			currentSubTexture = textureAtlas.getTexture(textureId) as ITexture;
+			currentSubTexture = textureAtlas.getTexture(textureId) as BaseSubTexture;
 			
 			var transform:TextureTransform = currentSubTexture.transform;
 			var mulX:Number = transform.positionMultiplierX;
@@ -145,7 +145,7 @@ package starling.drawer
 		}
 		
 		[Inline]
-		public final function hitTest(pixelPerfect:Boolean, texture:ITexture, transformedDrawingX:Number, transformedDrawingY:Number, transformedDrawingWidth:Number, transformedDrawingHeight:Number, transformedPoint:Point):Boolean
+		public final function hitTest(pixelPerfect:Boolean, texture:BaseSubTexture, transformedDrawingX:Number, transformedDrawingY:Number, transformedDrawingWidth:Number, transformedDrawingHeight:Number, transformedPoint:Point):Boolean
 		{
 			var isHit:Boolean = false;
 			
@@ -164,7 +164,7 @@ package starling.drawer
 			return isHit;
 		}
 		
-		
+		[Inline]
 		public final function setMaskData():void
 		{
 			var isMask:Boolean = drawingData.isMask;
@@ -179,6 +179,7 @@ package starling.drawer
 			//}
 		}
 		
+		[Inline]
 		public final function clearMaskData():void
 		{
 			//if (drawingData.isMask)
