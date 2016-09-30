@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<flexLibProperties includeAllClasses="true" useMultiPlatformConfig="false" version="3">
+  <includeClasses>
+    <classEntry path="StarlinScene"/>
+    <classEntry path="StarlingRoot"/>
+    <classEntry path="TestExporingStarling"/>
+    <classEntry path="starling.drawer.BaseMesh"/>
+    <classEntry path="starling.drawer.BatchMesh"/>
+    <classEntry path="starling.drawer.DisplayListDrawer"/>
+    <classEntry path="starling.drawer.ProjectionMatrix"/>
+    <classEntry path="starling.drawer.ShapeDrawer"/>
+    <classEntry path="starling.drawer.StarlingRenderer"/>
+    <classEntry path="swfDataExporter.GLAtlasExporter"/>
+    <classEntry path="swfDataExporter.GLSwfExporter"/>
+  </includeClasses>
+  <includeResources/>
+  <namespaceManifests/>
+</flexLibProperties>
