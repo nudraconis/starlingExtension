@@ -24,7 +24,7 @@ package starling.drawer
 		
 		private var context3D:Context3D;
 		
-		private var batchRegistersSize:int = (128 - 1);
+		private var batchRegistersSize:int = (128 - 4);
 		private var batchConstantsSize:int = batchRegistersSize * 4;
 		private var batchSize:int = batchRegistersSize / 4;
 		
@@ -33,10 +33,8 @@ package starling.drawer
 		private var texturesDrawList:Vector.<ITexture> = new Vector.<ITexture>(200000, true);
 		private var texturesListSize:int = 0;
 		
-		private var drawingList:Vector.<Number> = new Vector.<Number>(200000, true);
+		private var drawingList:Vector.<DrawingList> = new Vector.<DrawingList>(1000, true);
 		private var drawingListSize:int = 0;
-		
-		private var projection:ProjectionMatrix = new ProjectionMatrix().ortho(800, 800, null);
 		
 		private var currentTexture:TextureBase = null;
 		
@@ -48,7 +46,8 @@ package starling.drawer
 			Starling.current.enableErrorChecking = true;
 		}
 		
-		public function draw(texture:ITexture, matrix:Matrix, colorData:ColorData):void
+		[Inline]
+		public final function draw(texture:ITexture, matrix:Matrix, colorData:ColorData):void
 		{
 			texturesDrawList[texturesListSize++] = texture;
 		
@@ -68,30 +67,35 @@ package starling.drawer
 				ty = ty - pivotX * b - pivotY * d;
 			}
 			
-			drawingList[drawingListSize++] = a;
-			drawingList[drawingListSize++] = c;
-			drawingList[drawingListSize++] = b;
-			drawingList[drawingListSize++] = d;
+			var currentDrawingList:DrawingList = getDrawingList();
 			
-			drawingList[drawingListSize++] = tx;
-			drawingList[drawingListSize++] = ty;
-			drawingList[drawingListSize++] = texture.width;
-			drawingList[drawingListSize++] = texture.height;
+			if (currentDrawingList.isFull)
+			{
+				drawingListSize++;
+				currentDrawingList = getDrawingList();
+			}
 			
-			drawingList[drawingListSize++] = texture.u;
-			drawingList[drawingListSize++] = texture.v;
-			drawingList[drawingListSize++] = texture.uscale;
-			drawingList[drawingListSize++] = texture.vscale;
-			
-			drawingList[drawingListSize++] = colorData.r;
-			drawingList[drawingListSize++] = colorData.g;
-			drawingList[drawingListSize++] = colorData.b;
-			drawingList[drawingListSize++] = colorData.a;
+			currentDrawingList.addDrawingData(a, b, c, d, tx, ty, texture, colorData);
 		}
 		
+		[Inline]
+		private final function getDrawingList():DrawingList
+		{
+			var currentDrawingList:DrawingList = drawingList[drawingListSize];
+			
+			if (currentDrawingList == null)
+			{
+				currentDrawingList = new DrawingList(batchRegistersSize);
+				drawingList[drawingListSize] = currentDrawingList;
+			}
+			
+			return currentDrawingList;
+		}
+		
+		private static const rect:Rectangle = new Rectangle();
 		override public function getBounds(targetSpace:DisplayObject, resultRect:Rectangle = null):Rectangle 
 		{
-			return new Rectangle();
+			return rect;
 		}
 		
 		private function setTexture(texture:TextureBase, context3D:Context3D):void
@@ -113,27 +117,19 @@ package starling.drawer
 			
 			drawingGeometry.setToContext(context);
 			
-			var drawsNum:int = int(drawingListSize / batchRegistersSize);
-			
 			var currentTexture:TextureBase = texturesDrawList[0].gpuData;
 			setTexture(currentTexture, context);
 			
-			var totalRegisters:int = drawingListSize / 4;
-			
-			for (var i:int = 0; i < drawsNum; i++)
-			{
-				var registersToDraw:int = batchRegistersSize;
-				var constantsOffset:int = 4 + i * batchSize;
+			var length:int = drawingListSize + 1;
+			for (var i:int = 0; i < length; i++)
+			{	
+				var currentDrawingList:DrawingList = drawingList[i];
+				var trianglesNum:int = currentDrawingList.registersSize / 4 * 2;
 				
-				if (registersToDraw > totalRegisters)
-					registersToDraw = totalRegisters;
-					
-				totalRegisters -= registersToDraw;
-				
-				var trianglesNum:int = registersToDraw / 4 * 2;
-				
-				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, constantsOffset, drawingList, registersToDraw);
+				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 4, currentDrawingList.data, currentDrawingList.registersSize);
 				context.drawTriangles(drawingGeometry.indexBuffer, 0, trianglesNum);
+				
+				currentDrawingList.clear();
 			}
 			
 			drawingListSize = 0;
