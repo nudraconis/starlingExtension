@@ -120,7 +120,7 @@ package starling.drawer
 			
 			trace('current draw', drawsNum, batchSize, texturesListSize);
 			
-			var totalRegisters:int = drawingListSize * 4;
+			var totalRegisters:int = drawingListSize / 4;
 			
 			for (var i:int = 0; i < drawsNum; i++)
 			{
@@ -132,9 +132,10 @@ package starling.drawer
 					
 				totalRegisters -= registersToDraw;
 				
-				trace("draw", constantsOffset, constantsSize);
-				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, constantsOffset, drawingList, totalRegisters);
-				context.drawTriangles(drawingGeometry.indexBuffer);
+				var trianglesNum:int = registersToDraw / 4 * 2;
+				
+				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, constantsOffset, drawingList, registersToDraw);
+				context.drawTriangles(drawingGeometry.indexBuffer, 0, trianglesNum);
 			}
 			
 			drawingListSize = 0;
