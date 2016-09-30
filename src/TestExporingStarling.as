@@ -1,6 +1,5 @@
 package 
 {
-	import fastByteArray.FastByteArray;
 	import fastByteArray.SlowByteArray;
 	import flash.display.BitmapData;
 	import flash.display.Sprite;
@@ -17,10 +16,8 @@ package
 	import swfDataExporter.GLSwfExporter;
 	import swfdata.atlas.BitmapSubTexture;
 	import swfdata.atlas.BitmapTextureAtlas;
-	import swfdata.atlas.genome.GenomeTextureAtlas;
 	import swfdata.atlas.gl.GLTextureAtlas;
 	import swfdata.dataTags.SwfPackerTag;
-	import swfDataExporter.SwfExporter;
 	import swfparser.SwfDataParser;
 	import swfparser.SwfParserLight;
 	import util.MaxRectPacker;
