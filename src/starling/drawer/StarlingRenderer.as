@@ -23,7 +23,12 @@ package starling.drawer
 		private var shaderProgramm:Program3D;
 		
 		private var context3D:Context3D;
-		private var drawingGeometry:BatchMesh = new BatchMesh(1);
+		
+		private var batchRegistersSize:int = (128 - 1);
+		private var batchConstantsSize:int = batchRegistersSize * 4;
+		private var batchSize:int = batchRegistersSize / 4;
+		
+		private var drawingGeometry:BatchMesh = new BatchMesh(batchSize);
 		
 		private var texturesDrawList:Vector.<ITexture> = new Vector.<ITexture>(200000, true);
 		private var texturesListSize:int = 0;
@@ -108,33 +113,27 @@ package starling.drawer
 			
 			drawingGeometry.setToContext(context);
 			
-			var quadsNum:int = int(drawingListSize / 16);
+			var drawsNum:int = int(drawingListSize / batchRegistersSize);
 			
-			for (var i:int = 0; i < quadsNum; i++)
+			var currentTexture:TextureBase = texturesDrawList[0].gpuData;
+			setTexture(currentTexture, context);
+			
+			trace('current draw', drawsNum, batchSize, texturesListSize);
+			
+			var totalRegisters:int = drawingListSize * 4;
+			
+			for (var i:int = 0; i < drawsNum; i++)
 			{
-				var currentTexture:TextureBase = texturesDrawList[i].gpuData;
-				setTexture(currentTexture, context);
+				var registersToDraw:int = batchRegistersSize;
+				var constantsOffset:int = 4 + i * batchSize;
 				
-				var offset:int = i * 16;
+				if (registersToDraw > totalRegisters)
+					registersToDraw = totalRegisters;
+					
+				totalRegisters -= registersToDraw;
 				
-				HELPER_BUFFER[0] = drawingList[0 + offset];
-				HELPER_BUFFER[1] = drawingList[1 + offset];
-				HELPER_BUFFER[2] = drawingList[2 + offset];
-				HELPER_BUFFER[3] = drawingList[3 + offset];
-				HELPER_BUFFER[4] = drawingList[4 + offset];
-				HELPER_BUFFER[5] = drawingList[5 + offset];
-				HELPER_BUFFER[6] = drawingList[6 + offset];
-				HELPER_BUFFER[7] = drawingList[7 + offset];
-				HELPER_BUFFER[8] = drawingList[8 + offset];
-				HELPER_BUFFER[9] = drawingList[9 + offset];
-				HELPER_BUFFER[10] = drawingList[10 + offset];
-				HELPER_BUFFER[11] = drawingList[11 + offset];
-				HELPER_BUFFER[12] = drawingList[12 + offset];
-				HELPER_BUFFER[13] = drawingList[13 + offset];
-				HELPER_BUFFER[14] = drawingList[14 + offset];
-				HELPER_BUFFER[15] = drawingList[15 + offset];
-				
-				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 4, HELPER_BUFFER, 4);
+				trace("draw", constantsOffset, constantsSize);
+				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, constantsOffset, drawingList, totalRegisters);
 				context.drawTriangles(drawingGeometry.indexBuffer);
 			}
 			
@@ -158,33 +157,33 @@ package starling.drawer
 				var fragmentShader:String;
 				
 				vertexShader =
-								"mov vt0, va2						\n" +
-								"mov vt0, va0						\n" +
+								"mov		vt0			va2									\n" +
+								"mov		vt0			va0									\n" +
 
-								"mul vt1, va0.xy, vc5.zw			\n" +
+								"mul		vt1			va0.xy		vc[va2.x+1].zw		\n" +
 
-								"mul vt2, vt1.xy, vc4.xy			\n" +
-								"add vt2.x, vt2.x, vt2.y			\n" +
-								"add vt2.x, vt2.x, vc5.x			\n" +
+								"mul		vt2			vt1.xy		vc[va2.x].xy			\n" +
+								"add		vt2.x		vt2.x		vt2.y					\n" +
+								"add		vt2.x		vt2.x		vc[va2.x+1].x			\n" +
 
-								"mul vt3, vt1.xy, vc4.zw			\n" +
-								"add vt3.x, vt3.x, vt3.y            \n" +
-								"add vt3.x, vt3.x, vc5.y			\n" +
+								"mul		vt3			vt1.xy		vc[va2.x].zw			\n" +
+								"add		vt3.x		vt3.x		vt3.y					\n" +
+								"add		vt3.x		vt3.x		vc[va2.x+1].y			\n" +
 
-								"mov vt2.y, vt3.x					\n" +
+								"mov		vt2.y		vt3.x								\n" +
 
-								"mov vt2.zw, vt0.zw					\n" +
+								"mov		vt2.zw		vt0.zw								\n" +
 								
-								"m44 vt3, vt2, vc0					\n" +
+								"m44		vt3			vt2			vc0						\n" +
 								
 								//"mov vt3.z		va2.y			\n" +
-								"mov op			vt3					\n" +
+								"mov		op			vt3									\n" +
 
-								"mul vt0.xy, va1.xy, vc6.zw			\n" +
-								"add vt0.xy, vt0.xy, vc6.xy			\n" +
+								"mul		vt0.xy		va1.xy		vc[va2.x+2].zw		\n" +
+								"add		vt0.xy		vt0.xy		vc[va2.x+2].xy		\n" +
 
-								"mov v0, vt0						\n"+
-								"mov v1, vc7";
+								"mov		v0			vt0									\n"+
+								"mov		v1			vc[va2.x+3]";
 					
 				fragmentShader = 	"tex 	ft0		v0			fs0	<2d, clamp, linear>	\n"	
 								+	"mul	ft0		ft0			v1						\n"

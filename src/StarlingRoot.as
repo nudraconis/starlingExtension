@@ -19,7 +19,7 @@ package
 		private var mousePoint:Point = new Point();
 		private var drawer:DisplayListDrawer;
 		
-		private var transform:Matrix = new Matrix(1, 0, 0, 1, 0, 0);
+		private var transform:Matrix = new Matrix(1, 0, 0, 1, 300, 300);
 		private var currentSprite:SpriteData;
 		
 		public function StarlingRoot() 
@@ -50,7 +50,9 @@ package
 			if(currentSprite is IUpdatable)
 				(currentSprite as IUpdatable).update();
 					
+			trace('===========');
 			drawer.drawDisplayObject(currentSprite, transform);
+			trace('===========');
 			
 			super.render(support, parentAlpha);
 		}

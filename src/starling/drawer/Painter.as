@@ -1,12 +1,10 @@
 package starling.drawer 
 {
-	import com.genome2d.textures.GTextureFilteringType;
 	import flash.display.Graphics;
 	import flash.display3D.textures.Texture;
 	import flash.geom.Matrix;
 	import flash.geom.Point;
 	import flash.geom.Rectangle;
-	import genome.filters.GrassWind;
 	import swfdata.ColorData;
 	import swfdata.DisplayObjectData;
 	import swfdata.Rectagon;
@@ -21,8 +19,6 @@ package starling.drawer
 
 	public class Painter implements IDrawer
 	{
-		public static var grassWind:GrassWind = new GrassWind();
-		
 		public var hightlight:Boolean = false;
 		public var smooth:Boolean = true;
 		
@@ -206,10 +202,10 @@ package starling.drawer
 			
 			setMaskData();
 				
-			var filteringType:int = GTextureFilteringType.NEAREST;
+			//var filteringType:int = GTextureFilteringType.NEAREST;
 			
-			if (smooth)
-				filteringType = GTextureFilteringType.LINEAR;
+			//if (smooth)
+			//	filteringType = GTextureFilteringType.LINEAR;
 				
 			//if (filteringType != texture.g2d_filteringType)
 			//	texture.g2d_filteringType = filteringType;
