@@ -118,8 +118,6 @@ package starling.drawer
 			var currentTexture:TextureBase = texturesDrawList[0].gpuData;
 			setTexture(currentTexture, context);
 			
-			trace('current draw', drawsNum, batchSize, texturesListSize);
-			
 			var totalRegisters:int = drawingListSize / 4;
 			
 			for (var i:int = 0; i < drawsNum; i++)
