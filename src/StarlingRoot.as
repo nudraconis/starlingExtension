@@ -50,9 +50,7 @@ package
 			if(currentSprite is IUpdatable)
 				(currentSprite as IUpdatable).update();
 					
-			trace('===========');
 			drawer.drawDisplayObject(currentSprite, transform);
-			trace('===========');
 			
 			super.render(support, parentAlpha);
 		}
