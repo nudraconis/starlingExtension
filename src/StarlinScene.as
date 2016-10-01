@@ -14,9 +14,9 @@ package
 			addEventListener(Event.ADDED_TO_STAGE, onAddedToStage);
 		}
 		
-		public function show(library:SymbolsLibrary, genomeTextureAtlas:GLTextureAtlas):void 
+		public function show(library:SymbolsLibrary, texture:GLTextureAtlas):void 
 		{
-			(Starling.current.root as StarlingRoot).show(library, genomeTextureAtlas);
+			(Starling.current.root as StarlingRoot).show(library, texture);
 		}
 		
 		private function onAddedToStage(e:Event):void 

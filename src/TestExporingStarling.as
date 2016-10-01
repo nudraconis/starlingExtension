@@ -43,7 +43,7 @@ package
 			super();
 			
 			file = File.documentsDirectory.resolvePath(fileName + ".swf");
-			
+			DebugCanvas.current = graphics;
 			var t:Timer = new Timer(1000, 1);
 			t.addEventListener(TimerEvent.TIMER_COMPLETE, onStartParse);
 			t.start();
