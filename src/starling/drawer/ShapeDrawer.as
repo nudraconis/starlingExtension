@@ -5,7 +5,7 @@ package starling.drawer
 	import swfdata.DisplayObjectData;
 	import swfdata.ShapeData;
 	import swfdata.swfdata_inner;
-	import swfdata.atlas.ITextureAtlas;
+	import swfdata.atlas.BaseTextureAtlas;
 	import swfdrawer.data.DrawingData;
 	
 	use namespace swfdata_inner;
@@ -14,14 +14,14 @@ package starling.drawer
 	{
 		private var drawMatrix:Matrix = new Matrix();
 		
-		public function ShapeDrawer(atlas:ITextureAtlas, mousePoint:Point, target:StarlingRenderer) 
+		public function ShapeDrawer(atlas:BaseTextureAtlas, mousePoint:Point, target:StarlingRenderer) 
 		{
 			super(mousePoint, target);
 			
 			this.textureAtlas = atlas;
 		}
 		
-		public function set atlas(value:ITextureAtlas):void
+		public function set atlas(value:BaseTextureAtlas):void
 		{
 			textureAtlas = value;
 		}

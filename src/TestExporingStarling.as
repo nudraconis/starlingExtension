@@ -43,7 +43,7 @@ package
 			super();
 			
 			file = File.documentsDirectory.resolvePath(fileName + ".swf");
-			
+			DebugCanvas.current = graphics;
 			var t:Timer = new Timer(1000, 1);
 			t.addEventListener(TimerEvent.TIMER_COMPLETE, onStartParse);
 			t.start();
@@ -106,7 +106,7 @@ package
 			swfExporter = new GLSwfExporter();
 			
 			trace("### PACKED ATLAS ###");
-			trace(packedAtlas.atlasData.width, packedAtlas.atlasData.height);
+			trace(packedAtlas.width, packedAtlas.height);
 			swfExporter.exportSwf(packedAtlas, swfDataParser.context.shapeLibrary, swfDataParser.packerTags, data);
 			
 			var file:File = File.documentsDirectory.resolvePath(fileName + ".animation");
@@ -125,7 +125,7 @@ package
 		{
 			var atlasSoruce:BitmapData = maxRectPacker.drawAtlas(0);
 			packedAtlas = new BitmapTextureAtlas(atlasSoruce.width, atlasSoruce.height, 4);
-			packedAtlas.atlasData = atlasSoruce;
+			packedAtlas.data = atlasSoruce;
 			
 			var rects:Vector.<PackerRectangle> = maxRectPacker.atlasDatas[0].rectangles;
 			
@@ -156,7 +156,7 @@ package
 			{
 				var subTexture:BitmapSubTexture = atlas.subTextures[regionName];
 				var region:Rectangle = subTexture.bounds;
-				var packerRect:PackerRectangle = PackerRectangle.get(0, 0, region.width + atlas.padding * 2, region.height + atlas.padding * 2, subTexture.id, atlas.atlasData, region.x - atlas.padding, region.y - atlas.padding);
+				var packerRect:PackerRectangle = PackerRectangle.get(0, 0, region.width + atlas.padding * 2, region.height + atlas.padding * 2, subTexture.id, atlas.data, region.x - atlas.padding, region.y - atlas.padding);
 				packerRect.scaleX = subTexture.transform.scaleX;
 				packerRect.scaleY = subTexture.transform.scaleY;
 				

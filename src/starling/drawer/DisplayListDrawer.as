@@ -9,7 +9,7 @@ package starling.drawer
 	import swfdata.DisplayObjectData;
 	import swfdata.DisplayObjectTypes;
 	import swfdata.swfdata_inner;
-	import swfdata.atlas.ITextureAtlas;
+	import swfdata.atlas.BaseTextureAtlas;
 	import swfdrawer.IDrawer;
 	import swfdrawer.MovieClipDrawer;
 	import swfdrawer.SpriteDrawer;
@@ -25,10 +25,10 @@ package starling.drawer
 		
 		private var drawingData:DrawingData = new DrawingData();
 		
-		private var _atlas:ITextureAtlas;
+		private var _atlas:BaseTextureAtlas;
 		private var target:StarlingRenderer;
 		
-		public function DisplayListDrawer(atlas:ITextureAtlas = null, mousePoint:Point = null, target:StarlingRenderer = null) 
+		public function DisplayListDrawer(atlas:BaseTextureAtlas = null, mousePoint:Point = null, target:StarlingRenderer = null) 
 		{
 			this.target = target;
 			this.mousePoint = mousePoint;
@@ -37,7 +37,7 @@ package starling.drawer
 			initialize();
 		}
 		
-		public function set atlas(atlas:ITextureAtlas):void
+		public function set atlas(atlas:BaseTextureAtlas):void
 		{
 			_atlas = atlas;
 			shapeDrawer.atlas = atlas;
