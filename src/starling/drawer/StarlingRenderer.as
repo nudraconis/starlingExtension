@@ -28,7 +28,7 @@ package starling.drawer
 		
 		private var fragmentData:Vector.<Number> = new <Number>[0, 0, 0, DEFAULT_THRESHOLD];
 		
-		private var texturesDrawList:Vector.<BaseSubTexture> = new Vector.<BaseSubTexture>(200000, true);
+		private var texturesDrawList:Vector.<BaseSubTexture> = new Vector.<BaseSubTexture>(1000, true);
 		private var texturesListSize:int = 0;
 		
 		private var drawingList:Vector.<DrawingList> = new Vector.<DrawingList>(1000, true);

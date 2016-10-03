@@ -169,7 +169,7 @@ package
 		
 		private function parseSwfData():void 
 		{
-			swfDataParser = new SwfDataParser();
+			swfDataParser = new SwfDataParser(false, 512);
 			swfDataParser.parseSwf(fileContent, false);
 			fileContent.clear();
 		}
