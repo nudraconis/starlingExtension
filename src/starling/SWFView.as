@@ -16,7 +16,7 @@ package starling
 		private var drawer:DisplayListDrawer;
 		
 		private var transform:Matrix = new Matrix(1, 0, 0, 1, 0, 0);
-		private var bounds:Rectangle = new Rectangle();
+		private var _bounds:Rectangle = new Rectangle();
 		
 		private var viewData:SpriteData;
 		
@@ -55,7 +55,7 @@ package starling
 		
 		override public function getBounds(targetSpace:DisplayObject, resultRect:Rectangle = null):Rectangle 
 		{
-			return bounds;
+			return _bounds;
 		}
 		
 		override public function render(support:RenderSupport, parentAlpha:Number):void 
@@ -66,14 +66,14 @@ package starling
 			if(viewData is IUpdatable)
 				(viewData as IUpdatable).update();
 			
-			bounds.setTo(0, 0, 0, 0);
+			_bounds.setTo(0, 0, 0, 0);
 			
 			//mousePoint.x = transform.tx + 10;
 			//mousePoint.y = transform.ty + 10;
 			//DebugCanvas.current.clear();
 			
 			//drawer.checkMouseHit = drawer.checkBounds = drawer.debugDraw = true;
-			drawer.drawDisplayObject(viewData, transform, bounds);
+			drawer.drawDisplayObject(viewData, transform, _bounds);
 			
 			super.render(support, parentAlpha);
 		}
