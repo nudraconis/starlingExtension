@@ -25,7 +25,7 @@ package
 	
 	public class TestExporingStarling extends Sprite 
 	{
-		private var fileName:String = "bull_smith";
+		private var fileName:String = "test2_flip";
 		
 		private var fileContent:ByteArray;
 		private var swfDataParser:SwfDataParser;

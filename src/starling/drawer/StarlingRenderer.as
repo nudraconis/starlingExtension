@@ -129,7 +129,7 @@ package starling.drawer
 			context.setProgram(getProgram());
 			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, support.mvpMatrix3D, true);
 			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, fragmentData, 1);
-			context.setCulling(Context3DTriangleFace.BACK);
+			//context.setCulling(Context3DTriangleFace.BACK);
 			
 			drawingGeometry.setToContext(context);
 			
