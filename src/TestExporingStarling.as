@@ -25,7 +25,7 @@ package
 	
 	public class TestExporingStarling extends Sprite 
 	{
-		private var fileName:String = "test2_flip";
+		private var fileName:String = "bull_smith";
 		
 		private var fileContent:ByteArray;
 		private var swfDataParser:SwfDataParser;
@@ -92,7 +92,7 @@ package
 			
 			data.position = 0;
 			
-			var genomeTextureAtlas:GLTextureAtlas = swfExporter.importSwf("noname", data, swfParserLight.context.shapeLibrary, swfTags, Context3DTextureFormat.BGRA) as GLTextureAtlas;
+			var genomeTextureAtlas:GLTextureAtlas = swfExporter.importAnimation("noname", data, swfParserLight.context.shapeLibrary, swfTags, Context3DTextureFormat.BGRA) as GLTextureAtlas;
 			
 			swfParserLight.context.library.addShapes(swfParserLight.context.shapeLibrary);
 			swfParserLight.processDisplayObject(swfTags);
@@ -107,7 +107,7 @@ package
 			
 			trace("### PACKED ATLAS ###");
 			trace(packedAtlas.width, packedAtlas.height);
-			swfExporter.exportSwf(packedAtlas, swfDataParser.context.shapeLibrary, swfDataParser.packerTags, data);
+			swfExporter.exportAnimation(packedAtlas, swfDataParser.context.shapeLibrary, swfDataParser.packerTags, data);
 			
 			var file:File = File.documentsDirectory.resolvePath(fileName + ".animation");
 			var fileStream:FileStream = new FileStream();

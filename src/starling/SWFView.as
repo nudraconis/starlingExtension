@@ -49,6 +49,7 @@ package starling
 		{
 			this.viewData = viewData;
 			
+			this.atlas = texture;
 			drawer = new DisplayListDrawer(texture, mousePoint, this);
 			//drawer.debugConvas = DebugCanvas.current;
 		}
@@ -63,8 +64,7 @@ package starling
 			if (!drawer)
 				return;
 				
-			if(viewData is IUpdatable)
-				(viewData as IUpdatable).update();
+			viewData.update();
 			
 			_bounds.setTo(0, 0, 0, 0);
 			

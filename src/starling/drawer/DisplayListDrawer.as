@@ -106,7 +106,8 @@ package starling.drawer
 			draw(displayObject, drawingData);
 		}
 		
-		public function draw(displayObject:DisplayObjectData, drawingData:DrawingData):void
+		[Inline]
+		public final function draw(displayObject:DisplayObjectData, drawingData:DrawingData):void
 		{
 			var type:int = displayObject.displayObjectType;
 			
@@ -115,21 +116,25 @@ package starling.drawer
 			if (drawer)
 				drawer.draw(displayObject, drawingData);
 			else
-				throw new Error("drawer for " + displayObject + " is not defined");
+			{
+				CONFIG::debug
+				{
+					throw new Error("drawer for " + displayObject + " is not defined");
+				}
+				
+				CONFIG::release
+				{
+					trace("drawer for " + displayObject + " is not defined");
+				}
+			}
 		}
 		
 		/**
 		 * Задает таргет для отрисовки дебаг даты
 		 */
-		public function set debugConvas(value:Graphics):void 
+		public function set debugCanvas(value:Graphics):void 
 		{
-			shapeDrawer.convas = value;
-		}
-		
-		//Фильтринг linear, nearest
-		public function set smooth(value:Boolean):void 
-		{
-			shapeDrawer.smooth = value;
+			shapeDrawer.canvas = value;
 		}
 	}
 }

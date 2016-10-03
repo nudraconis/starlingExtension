@@ -2,7 +2,9 @@ package starling.drawer
 {
 	import flash.display3D.Context3D;
 	import flash.display3D.Context3DBlendFactor;
+	import flash.display3D.Context3DCompareMode;
 	import flash.display3D.Context3DProgramType;
+	import flash.display3D.Context3DTextureFilter;
 	import flash.display3D.Context3DTriangleFace;
 	import flash.display3D.Program3D;
 	import flash.display3D.textures.TextureBase;
@@ -14,6 +16,7 @@ package starling.drawer
 	import starling.display.DisplayObject;
 	import swfdata.ColorData;
 	import swfdata.atlas.BaseSubTexture;
+	import swfdata.atlas.BaseTextureAtlas;
 	
 	public class StarlingRenderer extends DisplayObject
 	{	
@@ -28,21 +31,41 @@ package starling.drawer
 		
 		private var fragmentData:Vector.<Number> = new <Number>[0, 0, 0, DEFAULT_THRESHOLD];
 		
-		private var texturesDrawList:Vector.<BaseSubTexture> = new Vector.<BaseSubTexture>(1000, true);
-		private var texturesListSize:int = 0;
+		public var atlas:BaseTextureAtlas;
 		
-		private var drawingList:Vector.<DrawingList> = new Vector.<DrawingList>(1000, true);
+		private static var _program3D:Program3D;
+		private static var drawingList:Vector.<DrawingList> = new Vector.<DrawingList>(1000, true);
 		private var drawingListSize:int = 0;
 		
 		private var currentTexture:TextureBase = null;
+		private var currentSamplerData:SamplerData;
+		
+		private var _smooth:Boolean = true;
 		
 		public function StarlingRenderer()
 		{
 			super();
 			
+			currentSamplerData = new SamplerData();
 			this.blendMode = BlendMode.NORMAL;
 			drawingGeometry.uploadToGpu(Starling.context);
-			//Starling.current.enableErrorChecking = false;
+			//Starling.current.enableErrorChecking = true;
+			
+			getProgram();
+		}
+		
+		public function set smooth(value:Boolean):void
+		{
+			if (_smooth == value)
+				return;
+				
+			_smooth = value;
+			currentSamplerData.filter = _smooth == true? Context3DTextureFilter.LINEAR:Context3DTextureFilter.NEAREST;
+		}
+		
+		public function get smooth():Boolean
+		{
+			return _smooth;
 		}
 		
 		public function set alphaThreshold(value:Number):void
@@ -58,8 +81,6 @@ package starling.drawer
 		[Inline]
 		public final function draw(texture:BaseSubTexture, matrix:Matrix, colorData:ColorData):void
 		{
-			texturesDrawList[texturesListSize++] = texture;
-		
 			var a:Number = matrix.a;
 			var b:Number = matrix.b;
 			var c:Number = matrix.c;
@@ -123,34 +144,37 @@ package starling.drawer
 			var context:Context3D = Starling.context;
 			
 			//premultiplied because textures is BitmapData
-			RenderSupport.setBlendFactors(true, blendMode);
-			//context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ZERO); //normal
+			//RenderSupport.setBlendFactors(true, blendMode); starling slow as 90 years old granny
+			context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA); //normal
 			//context.setBlendFactors(Context3DBlendFactor.SOURCE_ALPHA, Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA); //layer
-			context.setProgram(getProgram());
+			context.setProgram(_program3D);
 			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, support.mvpMatrix3D, true);
 			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, fragmentData, 1);
-			//context.setCulling(Context3DTriangleFace.BACK);
+			context.setDepthTest(false, Context3DCompareMode.ALWAYS);
 			
 			drawingGeometry.setToContext(context);
+			currentSamplerData.apply(context, 0);
 			
-			var currentTexture:TextureBase = texturesDrawList[0].gpuData;
+			var currentTexture:TextureBase = atlas.gpuData;
 			setTexture(currentTexture, context);
 
 			var triangleToRegisterRate:Number = 0.5;
 			var length:int = drawingListSize + 1;
+			
 			for (var i:int = 0; i < length; i++)
 			{	
 				var currentDrawingList:DrawingList = drawingList[i];
-				var trianglesNum:int = currentDrawingList.registersSize * triangleToRegisterRate;
+				var registersSize:int = currentDrawingList.registersSize;
+				var trianglesNum:int = registersSize * triangleToRegisterRate;
 				
-				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 4, currentDrawingList.data, currentDrawingList.registersSize);
+				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 4, currentDrawingList.data, registersSize);
 				context.drawTriangles(drawingGeometry.indexBuffer, 0, trianglesNum);
 				
 				currentDrawingList.clear();
 			}
 			
+			currentTexture = null;
 			drawingListSize = 0;
-			texturesListSize = 0;
 		}
 		
 		private function getProgram():Program3D
@@ -161,9 +185,9 @@ package starling.drawer
 			//if (mTexture)
 			//	programName = getImageProgramName(tinted, mTexture.mipMapping, mTexture.repeat, mTexture.format, mSmoothing);
 			
-			var program:Program3D = target.getProgram(programName);
+			_program3D = target.getProgram(programName);
 			
-			if (!program)
+			if (!_program3D)
 			{	
 				var vertexShader:String;
 				var fragmentShader:String;
@@ -197,17 +221,17 @@ package starling.drawer
 								"mov		v0			vt0									\n"+
 								"mov		v1			vc[va2.x+3]";
 					
-				fragmentShader = 	"tex 	ft0		v0			fs0	<2d, clamp, linear>	\n"	
+				fragmentShader = 	"tex 	ft0		v0			fs0		<ignoresampler>	\n"	
 								+	"mul	ft0		ft0			v1						\n"
-								+	"sub	ft1		ft0			fc0						\n"
+								+	"sub	ft1	ft0		fc0				\n"
 								+	"kil	ft1.w										\n"
 								//+	"mul	ft0		ft0			fc0 		\n"
 								+	"mov	oc		ft0						  ";
 									
-				program = target.registerProgramFromSource(programName, vertexShader, fragmentShader);
+				_program3D = target.registerProgramFromSource(programName, vertexShader, fragmentShader);
 			}
 			
-			return program;
+			return _program3D;
 		}
 	}
 }
