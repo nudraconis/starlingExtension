@@ -152,7 +152,7 @@ package
 			var atlas:BitmapTextureAtlas = swfDataParser.context.atlasDrawer.targetAtlas;
 			//WindowUtil.openWindowToReview(atlas.atlasData, "default atlas");
 			
-			for(var regionName:int in atlas.subTextures)
+			for(var regionName:String in atlas.subTextures)
 			{
 				var subTexture:BitmapSubTexture = atlas.subTextures[regionName];
 				var region:Rectangle = subTexture.bounds;
