@@ -19,12 +19,9 @@ package starling.drawer
 
 	public class Painter implements IDrawer
 	{
-		public var hightlight:Boolean = false;
-		public var smooth:Boolean = true;
-		
 		private var drawMatrix:Matrix = new Matrix();
 		
-		public var convas:Graphics;
+		public var canvas:Graphics;
 		
 		//TODO: заменить на объект типа Options с параметрами такого типа
 		public var isDebugDraw:Boolean = false;
@@ -49,8 +46,6 @@ package starling.drawer
 		private var drawingData:DrawingData;
 		private var target:StarlingRenderer;
 		
-		public var isUseGrassWind:Boolean = false;
-		
 		public function Painter(mousePoint:Point, target:StarlingRenderer) 
 		{
 			this.target = target;
@@ -66,7 +61,8 @@ package starling.drawer
 		/**
 		 * Apply sub texture draw transform
 		 */
-		public function applyDrawStyle():void
+		[Inline]
+		public final function applyDrawStyle():void
 		{
 			//trace('apply daraw', textureId);
 			
@@ -104,6 +100,12 @@ package starling.drawer
 		
 		public function draw(drawable:DisplayObjectData, drawingData:DrawingData):void 
 		{
+			trace("call daraw");
+		}
+		
+		[Inline]
+		public final function _draw(drawable:DisplayObjectData, drawingData:DrawingData):void 
+		{
 			this.drawingData = drawingData;
 			
 			drawingData.setFromDisplayObject(drawable);
@@ -119,29 +121,29 @@ package starling.drawer
 		{
 			if (drawingData.bound && hitTestResult)
 			{
-				convas.lineStyle(1.6, 0xFF0000, 0.8);
-				convas.drawRect(drawingRectagon.x, drawingRectagon.y, drawingRectagon.width, drawingRectagon.height);
+				canvas.lineStyle(1.6, 0xFF0000, 0.8);
+				canvas.drawRect(drawingRectagon.x, drawingRectagon.y, drawingRectagon.width, drawingRectagon.height);
 				
-				convas.lineStyle(1.6, 0x00FF00, 0.8);
-				convas.moveTo(drawingRectagon.resultTopLeft.x, drawingRectagon.resultTopLeft.y);
-				convas.lineTo(drawingRectagon.resultTopRight.x, drawingRectagon.resultTopRight.y);
-				convas.lineTo(drawingRectagon.resultBottomRight.x, drawingRectagon.resultBottomRight.y);
-				convas.lineTo(drawingRectagon.resultBottomLeft.x, drawingRectagon.resultBottomLeft.y);
-				convas.lineTo(drawingRectagon.resultTopLeft.x, drawingRectagon.resultTopLeft.y);
+				canvas.lineStyle(1.6, 0x00FF00, 0.8);
+				canvas.moveTo(drawingRectagon.resultTopLeft.x, drawingRectagon.resultTopLeft.y);
+				canvas.lineTo(drawingRectagon.resultTopRight.x, drawingRectagon.resultTopRight.y);
+				canvas.lineTo(drawingRectagon.resultBottomRight.x, drawingRectagon.resultBottomRight.y);
+				canvas.lineTo(drawingRectagon.resultBottomLeft.x, drawingRectagon.resultBottomLeft.y);
+				canvas.lineTo(drawingRectagon.resultTopLeft.x, drawingRectagon.resultTopLeft.y);
 			}
 		}
 		
 		[Inline]
 		public final function drawHitBounds(deltaX:Number, deltaY:Number, transformedDrawingX:Number, transformedDrawingY:Number, transformedDrawingWidth:Number, transformedDrawingHeight:Number, transformedPoint:Point):void
 		{
-			convas.lineStyle(1.6, hitTestResult? 0xFF0000:(0xFFFFFF * (currentSubTexture.id / 100)), 0.8);
-			convas.moveTo(transformedDrawingX + deltaX, transformedDrawingY + deltaY);
-			convas.lineTo(transformedDrawingX + transformedDrawingWidth + deltaX, transformedDrawingY + deltaY);
-			convas.lineTo(transformedDrawingX + transformedDrawingWidth + deltaX, transformedDrawingY + transformedDrawingHeight + deltaY);
-			convas.lineTo(transformedDrawingX + deltaX, transformedDrawingY + transformedDrawingHeight + deltaY);
-			convas.lineTo(transformedDrawingX + deltaX, transformedDrawingY + deltaY);
+			canvas.lineStyle(1.6, hitTestResult? 0xFF0000:(0xFFFFFF * (currentSubTexture.id / 100)), 0.8);
+			canvas.moveTo(transformedDrawingX + deltaX, transformedDrawingY + deltaY);
+			canvas.lineTo(transformedDrawingX + transformedDrawingWidth + deltaX, transformedDrawingY + deltaY);
+			canvas.lineTo(transformedDrawingX + transformedDrawingWidth + deltaX, transformedDrawingY + transformedDrawingHeight + deltaY);
+			canvas.lineTo(transformedDrawingX + deltaX, transformedDrawingY + transformedDrawingHeight + deltaY);
+			canvas.lineTo(transformedDrawingX + deltaX, transformedDrawingY + deltaY);
 			
-			convas.drawCircle(transformedPoint.x + deltaX, transformedPoint.y + deltaY, 5);
+			canvas.drawCircle(transformedPoint.x + deltaX, transformedPoint.y + deltaY, 5);
 		}
 		
 		[Inline]
@@ -167,8 +169,8 @@ package starling.drawer
 		[Inline]
 		public final function setMaskData():void
 		{
-			var isMask:Boolean = drawingData.isMask;
-			var isMasked:Boolean = drawingData.isMasked
+			//var isMask:Boolean = drawingData.isMask;
+			//var isMasked:Boolean = drawingData.isMasked
 			
 			//if (isMask)
 			//	Genome2D.g2d_instance.g2d_context.renderToStencil(1);	
@@ -186,10 +188,13 @@ package starling.drawer
 			//	Genome2D.g2d_instance.g2d_context.renderToColor(1);
 		}
 		
-		public function drawRectangle(drawingBounds:Rectangle, transform:Matrix):void 
+		[Inline]
+		public final function drawRectangle(drawingBounds:Rectangle, transform:Matrix):void 
 		{		
 			drawMatrix.identity();
-			drawMatrix.concat(transform);
+			
+			GeomMath.concatMatrices(drawMatrix, transform, drawMatrix);
+			//drawMatrix.concat(transform);
 			
 			applyDrawStyle();
 			
@@ -202,14 +207,6 @@ package starling.drawer
 			currentSubTexture.pivotY = -(drawingBounds.y * textureTransform.scaleY + (currentSubTexture.height - texturePadding2) / 2);
 			
 			setMaskData();
-				
-			//var filteringType:int = GTextureFilteringType.NEAREST;
-			
-			//if (smooth)
-			//	filteringType = GTextureFilteringType.LINEAR;
-				
-			//if (filteringType != texture.g2d_filteringType)
-			//	texture.g2d_filteringType = filteringType;
 				
 			var isMask:Boolean = drawingData.isMask;
 			

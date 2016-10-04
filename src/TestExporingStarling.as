@@ -107,14 +107,13 @@ package
 			swfExporter = new GLSwfExporter();
 			var swfParserLight:SwfParserLight = new SwfParserLight();
 			var swfTags:Vector.<SwfPackerTag> = new Vector.<SwfPackerTag>;
-			
+	
 			data.position = 0;
 			
-			var glTextureAtlas:GLTextureAtlas = swfExporter.importSwf("sample", data, swfParserLight.context.shapeLibrary, swfTags, Context3DTextureFormat.BGRA) as GLTextureAtlas;
+			var glTextureAtlas:GLTextureAtlas = swfExporter.importAnimation("noname", data, swfParserLight.context.shapeLibrary, swfTags, Context3DTextureFormat.BGRA) as GLTextureAtlas;
 			
 			swfParserLight.context.library.addShapes(swfParserLight.context.shapeLibrary);
-			swfParserLight.processDisplayObject(swfTags);
-			
+			swfParserLight.processDisplayObject(swfTags);		
 			
 			scene.show(swfParserLight.context.library, glTextureAtlas);
 			
@@ -127,7 +126,8 @@ package
 			
 			trace("### PACKED ATLAS ###");
 			trace(packedAtlas.width, packedAtlas.height);
-			swfExporter.exportSwf(packedAtlas, swfDataParser.context.shapeLibrary, swfDataParser.packerTags, data);
+
+			swfExporter.exportAnimation(packedAtlas, swfDataParser.context.shapeLibrary, swfDataParser.packerTags, data);
 			swfDataParser.clear();
 		}
 		
@@ -212,7 +212,7 @@ package
 		
 		private function parseSwfData():void 
 		{
-			swfDataParser = new SwfDataParser();
+			swfDataParser = new SwfDataParser(false, 512);
 			swfDataParser.parseSwf(fileContent, false);
 			fileContent.clear();
 		}

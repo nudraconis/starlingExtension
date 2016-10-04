@@ -16,7 +16,7 @@ package swfDataExporter
 			
 		}
 		
-		public function exportSwf(atlas:BitmapTextureAtlas, shapesList:ShapeLibrary, tagsList:Vector.<SwfPackerTag>, output:IByteArray):IByteArray
+		public function exportAnimation(atlas:BitmapTextureAtlas, shapesList:ShapeLibrary, tagsList:Vector.<SwfPackerTag>, output:IByteArray):IByteArray
 		{
 			output.begin();
 			
@@ -43,6 +43,11 @@ package swfDataExporter
 		}
 		
 		public function importSwf(name:String, input:IByteArray, shapesList:ShapeLibrary, tagsList:Vector.<SwfPackerTag>, format:String):BaseTextureAtlas
+		{
+			return null;
+		}
+		
+		public function importAnimation(name:String, input:IByteArray, shapesList:ShapeLibrary, tagsList:Vector.<SwfPackerTag>, format:String):BaseTextureAtlas
 		{
 			input.byteArray.inflate();
 			

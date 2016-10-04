@@ -26,18 +26,20 @@ package starling.drawer
 			textureAtlas = value;
 		}
 		
-		override public function draw(drawable:DisplayObjectData, drawingData:swfdrawer.data.DrawingData):void 
+		public override function draw(drawable:DisplayObjectData, drawingData:DrawingData):void 
 		{
-			super.draw(drawable, drawingData);
+			_draw(drawable, drawingData);
 			
 			drawMatrix.identity();
 			
 			if (drawable.transform)
 			{
-				drawMatrix.concat(drawable.transform);
+				GeomMath.concatMatrices(drawMatrix, drawable.transform, drawMatrix);
+				//drawMatrix.concat(drawable.transform);
 			}
 				
-			drawMatrix.concat(drawingData.transform);
+			GeomMath.concatMatrices(drawMatrix, drawingData.transform, drawMatrix);
+			//drawMatrix.concat(drawingData.transform);
 			
 			var drawableAsShape:ShapeData = drawable as ShapeData;
 			

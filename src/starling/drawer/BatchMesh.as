@@ -55,8 +55,10 @@ package starling.drawer
 			orderBuffer.uploadFromVector(orderBufferDataRaw, 0, verticesCount); 
 		}
 		
-		public function setToContext(context3D:Context3D):void 
+		[Inline]
+		public final function setToContext(context3D:Context3D):void 
 		{
+			//TODO: Юзать 1 буффер
 			context3D.setVertexBufferAt(0, vertexBuffer, 0, Context3DVertexBufferFormat.FLOAT_3);
 			context3D.setVertexBufferAt(1, uvBuffer, 0, Context3DVertexBufferFormat.FLOAT_2);
 			context3D.setVertexBufferAt(2, orderBuffer, 0, Context3DVertexBufferFormat.FLOAT_1);
