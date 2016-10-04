@@ -1,6 +1,8 @@
 package 
 {
 	import fastByteArray.SlowByteArray;
+	
+	import flash.display.Bitmap;
 	import flash.display.BitmapData;
 	import flash.display.Sprite;
 	import flash.display3D.Context3DTextureFormat;
@@ -12,24 +14,30 @@ package
 	import flash.geom.Rectangle;
 	import flash.net.FileFilter;
 	import flash.utils.ByteArray;
+	import flash.utils.Endian;
 	import flash.utils.Timer;
+	
 	import swfDataExporter.GLSwfExporter;
+	
 	import swfdata.atlas.BitmapSubTexture;
 	import swfdata.atlas.BitmapTextureAtlas;
 	import swfdata.atlas.gl.GLTextureAtlas;
 	import swfdata.dataTags.SwfPackerTag;
+	
 	import swfparser.SwfDataParser;
 	import swfparser.SwfParserLight;
+	
 	import util.MaxRectPacker;
 	import util.PackerRectangle;
 	
 	public class TestExporingStarling extends Sprite 
 	{
-		private var fileName:String = "bull_smith";
+		private var fileName:String = "biker";
 		
 		private var fileContent:ByteArray;
 		private var swfDataParser:SwfDataParser;
 		private var packedAtlas:BitmapTextureAtlas;
+		//private var maxRectPacker:MaxRectPacker = new MaxRectPacker(2048, 2048);
 		private var maxRectPacker:MaxRectPacker = new MaxRectPacker(2048, 2048);
 		private var data:SlowByteArray = new SlowByteArray(null, 1024*100000);
 		//private var data:IByteArray = new FastByteArray(null, 1024*100000);
@@ -42,12 +50,18 @@ package
 		{
 			super();
 			
-			file = File.documentsDirectory.resolvePath(fileName + ".swf");
 			DebugCanvas.current = graphics;
+			
+			file = File.documentsDirectory.resolvePath(fileName + ".swf");
 			var t:Timer = new Timer(1000, 1);
 			t.addEventListener(TimerEvent.TIMER_COMPLETE, onStartParse);
 			t.start();
+			
 			//browseContetn();
+
+			/*var t:Timer = new Timer(1000, 1);
+			t.addEventListener(TimerEvent.TIMER_COMPLETE, loadAnimation);
+			t.start();*/
 		}
 		
 		private function onStartParse(e:TimerEvent = null):void 
@@ -57,13 +71,16 @@ package
 			packRectangles();
 			rebuildAtlas();
 			packData();
+			saveAnimation();
+			loadAnimation();
 			unpackData();
 		}
 		
 		private function browseContetn():void 
 		{
-			file = new File("D:\panda\village\trunk-static\root\swf\actor\skin_summer\complex_decor");//File.applicationDirectory.clone();
+			//file = new File("D:\panda\village\trunk-static\root\swf\actor\skin_summer\complex_decor");//File.applicationDirectory.clone();
 			
+			file = File.applicationDirectory;
 			file.browseForOpen("Select animation file", [new FileFilter("swf file with animation", "*.swf", "*.swf")]);
 			file.addEventListener(Event.SELECT, onSelected);
 		}
@@ -87,18 +104,21 @@ package
 		
 		private function onSceneReady(e:Event):void 
 		{
+			swfExporter = new GLSwfExporter();
 			var swfParserLight:SwfParserLight = new SwfParserLight();
 			var swfTags:Vector.<SwfPackerTag> = new Vector.<SwfPackerTag>;
 			
 			data.position = 0;
 			
-			var genomeTextureAtlas:GLTextureAtlas = swfExporter.importSwf("noname", data, swfParserLight.context.shapeLibrary, swfTags, Context3DTextureFormat.BGRA) as GLTextureAtlas;
+			var glTextureAtlas:GLTextureAtlas = swfExporter.importSwf("sample", data, swfParserLight.context.shapeLibrary, swfTags, Context3DTextureFormat.BGRA) as GLTextureAtlas;
 			
 			swfParserLight.context.library.addShapes(swfParserLight.context.shapeLibrary);
 			swfParserLight.processDisplayObject(swfTags);
 			
 			
-			scene.show(swfParserLight.context.library, genomeTextureAtlas);
+			scene.show(swfParserLight.context.library, glTextureAtlas);
+			
+			data.clear();
 		}
 		
 		private function packData():void 
@@ -108,17 +128,39 @@ package
 			trace("### PACKED ATLAS ###");
 			trace(packedAtlas.width, packedAtlas.height);
 			swfExporter.exportSwf(packedAtlas, swfDataParser.context.shapeLibrary, swfDataParser.packerTags, data);
-			
+			swfDataParser.clear();
+		}
+		
+		private function saveAnimation():void
+		{
 			var file:File = File.documentsDirectory.resolvePath(fileName + ".animation");
 			var fileStream:FileStream = new FileStream();
 			fileStream.open(file, FileMode.WRITE);
 			
 			fileContent = new ByteArray();
+			fileContent.position = 0;
+			fileContent.endian = Endian.LITTLE_ENDIAN;
 			fileStream.writeBytes(data.byteArray, 0, data.length);
 			fileStream.close();
 			
 			//data.clear();
-			swfDataParser.clear();
+		}
+		
+		private function loadAnimation(e:Event = null):void {
+			if (data) {
+				data.clear();
+				data = null;
+			}
+			if (fileContent) {
+				fileContent.clear();
+				fileContent = null;
+			}
+			file = File.documentsDirectory.resolvePath(fileName + ".animation");
+			openAndLoadContent();
+			fileContent.position = 0;
+			fileContent.endian = Endian.LITTLE_ENDIAN;
+			data = new SlowByteArray(fileContent);
+			unpackData();
 		}
 		
 		private function rebuildAtlas():void 
@@ -139,8 +181,9 @@ package
 				
 				packedAtlas.createSubTexture(currentRegion.id, region, currentRegion.scaleX, currentRegion.scaleY);
 			}
-			
 			//WindowUtil.openWindowToReview(packedAtlas.atlasData);
+			
+			//addChild(new Bitmap(atlasSoruce));
 			
 			maxRectPacker.clearData();
 		}
@@ -154,7 +197,7 @@ package
 			
 			for(var regionName:String in atlas.subTextures)
 			{
-				var subTexture:BitmapSubTexture = atlas.subTextures[regionName];
+				var subTexture:BitmapSubTexture = atlas.subTextures[int(regionName)];
 				var region:Rectangle = subTexture.bounds;
 				var packerRect:PackerRectangle = PackerRectangle.get(0, 0, region.width + atlas.padding * 2, region.height + atlas.padding * 2, subTexture.id, atlas.data, region.x - atlas.padding, region.y - atlas.padding);
 				packerRect.scaleX = subTexture.transform.scaleX;
