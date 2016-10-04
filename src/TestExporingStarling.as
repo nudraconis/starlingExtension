@@ -39,7 +39,7 @@ package
 		private var packedAtlas:BitmapTextureAtlas;
 		//private var maxRectPacker:MaxRectPacker = new MaxRectPacker(2048, 2048);
 		private var maxRectPacker:MaxRectPacker = new MaxRectPacker(2048, 2048);
-		private var data:SlowByteArray = new SlowByteArray(null, 1024*100000);
+		private var data:SlowByteArray;
 		//private var data:IByteArray = new FastByteArray(null, 1024*100000);
 		private var swfExporter:GLSwfExporter;
 		private var file:File;
@@ -72,8 +72,13 @@ package
 			rebuildAtlas();
 			packData();
 			saveAnimation();
-			loadAnimation();
-			unpackData();
+			
+			var t:Timer = new Timer(1000, 1);
+			t.addEventListener(TimerEvent.TIMER_COMPLETE, loadAnimation);
+			t.start();
+			
+			//loadAnimation();
+			//unpackData();
 		}
 		
 		private function browseContetn():void 
@@ -126,6 +131,8 @@ package
 			
 			trace("### PACKED ATLAS ###");
 			trace(packedAtlas.width, packedAtlas.height);
+			
+			data = new SlowByteArray(null, 1024*100000);
 
 			swfExporter.exportAnimation(packedAtlas, swfDataParser.context.shapeLibrary, swfDataParser.packerTags, data);
 			swfDataParser.clear();
@@ -138,8 +145,8 @@ package
 			fileStream.open(file, FileMode.WRITE);
 			
 			fileContent = new ByteArray();
-			fileContent.position = 0;
-			fileContent.endian = Endian.LITTLE_ENDIAN;
+			data.position = 0;
+			data.byteArray.endian = fileContent.endian = Endian.LITTLE_ENDIAN;
 			fileStream.writeBytes(data.byteArray, 0, data.length);
 			fileStream.close();
 			
@@ -212,7 +219,7 @@ package
 		
 		private function parseSwfData():void 
 		{
-			swfDataParser = new SwfDataParser(false, 512);
+			swfDataParser = new SwfDataParser();
 			swfDataParser.parseSwf(fileContent, false);
 			fileContent.clear();
 		}
