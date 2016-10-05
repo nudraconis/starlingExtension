@@ -1,8 +1,11 @@
 package 
 {
 	import flash.geom.Matrix;
+	
+	import starling.AnimationRenderer;
 	import starling.SWFView;
 	import starling.display.Sprite;
+	
 	import swfdata.MovieClipData;
 	import swfdata.SpriteData;
 	import swfdata.SymbolsLibrary;
@@ -18,25 +21,26 @@ package
 		
 		public function show(library:SymbolsLibrary, texture:GLTextureAtlas):void 
 		{
-			var h:int = 80;
-			var w:int = 100;
+			var h:int = 150;
+			var w:int = 200;
 			for (var i:int = 0; i < library.spritesList.length; i++) 
 			{
 				
-				var view:SWFView = new SWFView();
+				var view:AnimationRenderer = new AnimationRenderer();
 				view.alphaThreshold = 0.1;
 				
-				view.x = (i % 10 ) * w + 50;
+				view.x = (i % 10 ) * w + 100;
 				view.y = int(i / 10) * h  + 400;
 				addChild(view);
 				
-				var viewData:SpriteData = library.spritesList[i];
+				var viewData:SpriteData = library.spritesList[0];
 				
 				var spriteAsTimeline:MovieClipData = viewData as MovieClipData;	
 				
 				if(spriteAsTimeline)
-					spriteAsTimeline.play();
+					spriteAsTimeline.stop();
 				view.show(viewData, texture);
+				view.currentFrame = i;
 			}
 				
 			/*for (var i:int = 0; i < 250; i++) 

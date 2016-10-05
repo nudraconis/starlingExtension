@@ -18,7 +18,7 @@ package starling
 		private var transform:Matrix = new Matrix(1, 0, 0, 1, 0, 0);
 		private var _bounds:Rectangle = new Rectangle();
 		
-		private var viewData:SpriteData;
+		protected var viewData:SpriteData;
 		
 		public function SWFView() 
 		{

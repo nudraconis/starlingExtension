@@ -13,6 +13,7 @@
     <classEntry path="starling.drawer.StarlingRenderer"/>
     <classEntry path="swfDataExporter.GLAtlasExporter"/>
     <classEntry path="swfDataExporter.GLSwfExporter"/>
+    <classEntry path="starling.AnimationRenderer"/>
   </includeClasses>
   <includeResources/>
   <namespaceManifests/>
