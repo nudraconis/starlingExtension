@@ -99,9 +99,9 @@ package starling.drawer
 			drawingData.bound = bound;
 			
 			if(colorData != null)
-				drawingData.colorData.mulColorData(colorData);
+				drawingData.colorData.preMultiply(colorData);
 			else if(displayObject.colorData)
-				drawingData.colorData.mulColorData(displayObject.colorData);
+				drawingData.colorData.preMultiply(displayObject.colorData);
 			
 			draw(displayObject, drawingData);
 		}

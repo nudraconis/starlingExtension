@@ -9,7 +9,7 @@ package starling.drawer
 		public var orderBufferDataRaw:Vector.<Number> = new Vector.<Number>();
 		public var orderBuffer:VertexBuffer3D;
 		
-		public function BatchMesh(batchSize:int) 
+		public function BatchMesh(batchSize:int, registersPerGeometry:int) 
 		{
 			super();
 			
@@ -34,7 +34,7 @@ package starling.drawer
 				indexDataRaw[indexDataIndex++] = 4 * i;	indexDataRaw[indexDataIndex++] = 4 * i + 1;	indexDataRaw[indexDataIndex++] = 4 * i + 2;
 				indexDataRaw[indexDataIndex++] = 4 * i;	indexDataRaw[indexDataIndex++] = 4 * i + 2;	indexDataRaw[indexDataIndex++] = 4 * i + 3;
 				
-				order = 4 + (i * 4);
+				order = 4 + (i * registersPerGeometry);
 				
 				orderBufferDataRaw[orderDataIndex++] = order;	//orderBufferDataRaw[orderDataIndex++] = order;
 				orderBufferDataRaw[orderDataIndex++] = order;	//orderBufferDataRaw[orderDataIndex++] = order;

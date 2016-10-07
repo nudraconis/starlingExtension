@@ -23,13 +23,22 @@ package starling.drawer
 		private static const DEFAULT_THRESHOLD:Number = 0.1;
 		private static const MAX_VERTEX_CONSTANTS:int = 128;//may change in different profiles
 		
+		private var registersPerGeometry:int = 5;
 		private var batchRegistersSize:int = (MAX_VERTEX_CONSTANTS - 4);
 		private var batchConstantsSize:int = batchRegistersSize * 4;
-		private var batchSize:int = batchRegistersSize / 4;
+		private var batchSize:int = batchRegistersSize / registersPerGeometry;
 		
-		private var drawingGeometry:BatchMesh = new BatchMesh(batchSize);
+		private var drawingGeometry:BatchMesh = new BatchMesh(batchSize, registersPerGeometry);
 		
-		private var fragmentData:Vector.<Number> = new <Number>[0, 0, 0, DEFAULT_THRESHOLD];
+		private var fragmentData:Vector.<Number> = new <Number>[
+																0, 0, 0, DEFAULT_THRESHOLD,	
+																
+																//1, 0, 0, 0,
+																//0, 1, 0, 0,
+																//0, 0, 1, 0,
+																//0, 0, 0, 1,
+																
+																0, 0, 0, 0.0001];
 		
 		public var atlas:BaseTextureAtlas;
 		
@@ -49,7 +58,7 @@ package starling.drawer
 			currentSamplerData = new SamplerData();
 			this.blendMode = BlendMode.NORMAL;
 			drawingGeometry.uploadToGpu(Starling.context);
-			//Starling.current.enableErrorChecking = true;
+			Starling.current.enableErrorChecking = true;
 			
 			getProgram();
 		}
@@ -116,7 +125,7 @@ package starling.drawer
 			
 			if (currentDrawingList == null)
 			{
-				currentDrawingList = new DrawingList(batchRegistersSize);
+				currentDrawingList = new DrawingList(batchRegistersSize, registersPerGeometry);
 				drawingList[drawingListSize] = currentDrawingList;
 			}
 			
@@ -149,16 +158,15 @@ package starling.drawer
 			//context.setBlendFactors(Context3DBlendFactor.SOURCE_ALPHA, Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA); //layer
 			context.setProgram(_program3D);
 			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, support.mvpMatrix3D, true);
-			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, fragmentData, 1);
+			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, fragmentData, 2);
 			context.setDepthTest(false, Context3DCompareMode.ALWAYS);
 			
 			drawingGeometry.setToContext(context);
 			currentSamplerData.apply(context, 0);
 			
-			var currentTexture:TextureBase = atlas.gpuData;
-			setTexture(currentTexture, context);
+			setTexture(atlas.gpuData, context);
 
-			var triangleToRegisterRate:Number = 0.5;
+			var triangleToRegisterRate:Number = 2 / registersPerGeometry;
 			var length:int = drawingListSize + 1;
 			
 			for (var i:int = 0; i < length; i++)
@@ -196,7 +204,7 @@ package starling.drawer
 								"mov		vt0			va2									\n" +
 								"mov		vt0			va0									\n" +
 
-								"mul		vt1			va0.xy		vc[va2.x+1].zw		\n" +
+								"mul		vt1			va0.xy		vc[va2.x+1].zw			\n" +
 
 								"mul		vt2			vt1.xy		vc[va2.x].xy			\n" +
 								"add		vt2.x		vt2.x		vt2.y					\n" +
@@ -215,18 +223,29 @@ package starling.drawer
 								//"mov vt3.z		va2.y			\n" +
 								"mov		op			vt3									\n" +
 
-								"mul		vt0.xy		va1.xy		vc[va2.x+2].zw		\n" +
-								"add		vt0.xy		vt0.xy		vc[va2.x+2].xy		\n" +
+								"mul		vt0.xy		va1.xy		vc[va2.x+2].zw			\n" +
+								"add		vt0.xy		vt0.xy		vc[va2.x+2].xy			\n" +
 
-								"mov		v0			vt0									\n"+
-								"mov		v1			vc[va2.x+3]";
+								"mov		v0			vt0									\n" +
+								"mov		v1			vc[va2.x+3]							\n" +
+								"mov		v2			vc[va2.x+4]";
 					
-				fragmentShader = 	"tex 	ft0		v0			fs0		<ignoresampler>	\n"	
-								+	"mul	ft0		ft0			v1						\n"
-								+	"sub	ft1	ft0		fc0				\n"
-								+	"kil	ft1.w										\n"
-								//+	"mul	ft0		ft0			fc0 		\n"
-								+	"mov	oc		ft0						  ";
+				fragmentShader = 	"tex 	ft0			v0			fs0		<ignoresampler>	\n"	
+				
+								+	"max	ft0			ft0			fc1						\n"
+								
+								+	"div	ft0.xyz		ft0.xyz		ft0.www					\n"
+								
+								//+	"m44	ft0			ft0			fc1						\n"
+								+	"mul	ft0			ft0			v1						\n"
+								+	"add	ft0			ft0			v2						\n"
+								
+								+	"mul	ft0.xyz		ft0.xyz		ft0.www					\n"
+								
+								+	"sub	ft1.w		ft0.w		fc0.w					\n"
+								+	"kil	ft1.w											\n"
+								
+								+	"mov	oc			ft0									  ";
 									
 				_program3D = target.registerProgramFromSource(programName, vertexShader, fragmentShader);
 			}

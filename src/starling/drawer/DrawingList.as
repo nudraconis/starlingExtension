@@ -5,14 +5,18 @@ package starling.drawer
 	
 	public class DrawingList 
 	{
+		private static const RGB_VALUE_TO_SHADER:Number = 1 / 0xff;
+		private var registersPerGeometry:int;
+		
 		public var data:Vector.<Number>;
 		public var length:int = 0;
 		public var registersSize:int = 0;
 		public var registersMaxSize:int = 0;
 		public var isFull:Boolean;
 		
-		public function DrawingList(size:int) 
+		public function DrawingList(size:int, registersPerGeometry:int) 
 		{
+			this.registersPerGeometry = registersPerGeometry;
 			registersMaxSize = size;
 			data = new Vector.<Number>(registersMaxSize * 4, true);
 		}
@@ -43,14 +47,21 @@ package starling.drawer
 			data[length++] = texture.uscale;
 			data[length++] = texture.vscale;
 			
-			data[length++] = colorData.r;
-			data[length++] = colorData.g;
-			data[length++] = colorData.b;
-			data[length++] = colorData.a;
+			data[length++] = colorData.redMultiplier;
+			data[length++] = colorData.greenMultiplier;
+			data[length++] = colorData.blueMultiplier;
+			data[length++] = colorData.alphaMultiplier;
 			
-			registersSize += 4;
+			data[length++] = colorData.redAdd * RGB_VALUE_TO_SHADER;
+			data[length++] = colorData.greenAdd * RGB_VALUE_TO_SHADER
+			data[length++] = colorData.blueAdd * RGB_VALUE_TO_SHADER
+			data[length++] = colorData.alphaAdd * RGB_VALUE_TO_SHADER
 			
-			isFull = registersSize == registersMaxSize;
+			//trace(colorData.redAdd, colorData.greenAdd, colorData.blueAdd, colorData.alphaAdd);
+			
+			registersSize += registersPerGeometry;
+			
+			isFull = registersSize + registersPerGeometry > registersMaxSize;
 		}
 	}
 }

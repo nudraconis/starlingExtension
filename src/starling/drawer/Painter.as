@@ -212,12 +212,6 @@ package starling.drawer
 			
 			var color:ColorData = drawingData.colorData;
 			
-			if(drawingData.isApplyColorTrasnform)
-			{
-				//filter = colorFilter.getColorFilter();
-				//(filter as GColorMatrixFilter).setMatrix(drawingData.colorTransform.matrix);
-			}
-			
 			target.draw(currentSubTexture, drawMatrix, color);
 				
 			clearMaskData();
