@@ -23,12 +23,12 @@ package starling.drawer
 		private static const DEFAULT_THRESHOLD:Number = 0.1;
 		private static const MAX_VERTEX_CONSTANTS:int = 128;//may change in different profiles
 		
-		private var registersPerGeometry:int = 5;
-		private var batchRegistersSize:int = (MAX_VERTEX_CONSTANTS - 4);
-		private var batchConstantsSize:int = batchRegistersSize * 4;
-		private var batchSize:int = batchRegistersSize / registersPerGeometry;
+		private static var registersPerGeometry:int = 5;
+		private static var batchRegistersSize:int = (MAX_VERTEX_CONSTANTS - 4);
+		private static var batchConstantsSize:int = batchRegistersSize * 4;
+		private static var batchSize:int = batchRegistersSize / registersPerGeometry;
 		
-		private var drawingGeometry:BatchMesh = new BatchMesh(batchSize, registersPerGeometry);
+		private static var drawingGeometry:BatchMesh = new BatchMesh(batchSize, registersPerGeometry);
 		
 		private var fragmentData:Vector.<Number> = new <Number>[
 																0, 0, 0, DEFAULT_THRESHOLD,	
@@ -251,6 +251,10 @@ package starling.drawer
 			}
 			
 			return _program3D;
+		}
+		
+		override public function dispose():void {
+			super.dispose();
 		}
 	}
 }
