@@ -77,5 +77,11 @@ package starling
 			
 			super.render(support, parentAlpha);
 		}
+		
+		override public function dispose():void {
+			drawer = null;
+			viewData = null;
+			super.dispose();
+		}
 	}
 }

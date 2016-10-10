@@ -254,6 +254,9 @@ package starling.drawer
 		}
 		
 		override public function dispose():void {
+			atlas = null;
+			var context:Context3D = Starling.context;
+			context.setTextureAt(0, null);
 			super.dispose();
 		}
 	}
