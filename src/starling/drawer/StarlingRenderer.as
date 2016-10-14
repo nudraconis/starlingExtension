@@ -107,14 +107,15 @@ package starling.drawer
 			
 			//TODO: менять лист ка ктолько поменяется текстура
 			var currentDrawingList:DrawingList = getDrawingList();			
-			if (currentDrawingList.isFull || currentDrawingList.blendMode != blendMode)
+			if (currentDrawingList.isFull || (currentDrawingList.blendMode != blendMode && blendMode))
 			{
 				drawingListSize++;
 				currentDrawingList = getDrawingList();
 			}
 			
 			currentDrawingList.addDrawingData(a, b, c, d, tx, ty, texture, colorData);
-			currentDrawingList.blendMode = blendMode;
+			if (blendMode)
+				currentDrawingList.blendMode = blendMode;
 		}
 		
 		[Inline]
