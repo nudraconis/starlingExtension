@@ -11,7 +11,6 @@ package starling.drawer
 	import flash.geom.Rectangle;
 	import starling.core.RenderSupport;
 	import starling.core.Starling;
-	import starling.display.BlendMode;
 	import starling.display.DisplayObject;
 	import swfdata.ColorData;
 	import swfdata.atlas.BaseSubTexture;
@@ -28,6 +27,8 @@ package starling.drawer
 		private static var batchSize:int = batchRegistersSize / registersPerGeometry;
 		
 		private static var drawingGeometry:BatchMesh = new BatchMesh(batchSize, registersPerGeometry);
+		
+		private static var blendModes:Vector.<BlendMode> = BlendMode.getBlendModesList();
 		
 		private var fragmentData:Vector.<Number> = new <Number>[
 																0, 0, 0, DEFAULT_THRESHOLD,	
@@ -55,9 +56,11 @@ package starling.drawer
 			super();
 			
 			currentSamplerData = new SamplerData();
-			this.blendMode = BlendMode.NORMAL;
-			drawingGeometry.uploadToGpu(Starling.context);
-			Starling.current.enableErrorChecking = true;
+			
+			if(drawingGeometry.uploaded == false)
+				drawingGeometry.uploadToGpu(Starling.context);
+				
+			Starling.current.enableErrorChecking = CONFIG::debug;
 			
 			getProgram();
 		}
@@ -176,89 +179,9 @@ package starling.drawer
 				var trianglesNum:int = registersSize * triangleToRegisterRate;
 				
 				// TODO добавить по возможности все флэшёвые моды
-				switch(currentDrawingList.blendMode)
-				{
-					case 2:
-					{
-						// layer
-						context.setBlendFactors(Context3DBlendFactor.SOURCE_ALPHA, Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA); 
-						break;
-					}
-					case 3:
-					{
-						//MULTIPLY
-						context.setBlendFactors(Context3DBlendFactor.DESTINATION_COLOR, Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA ); 
-						break;
-					}
-					case 4:
-					{
-						//SCREEN
-						context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ONE_MINUS_SOURCE_COLOR );
-						break;
-					}
-					case 5:
-					{
-						//TODO lighten
-						context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA);	
-						break;
-					}
-					case 6:
-					{
-						//TODO darken
-						context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA);	
-						break;
-					}
-					case 7:
-					{
-						//TODO difference
-						context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA);	
-						break;
-					}
-					case 8:
-					{
-						//ADD
-						context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ONE); 
-						break;
-					}
-					case 9:
-					{	//TODO subtract
-						context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA);	
-						break;
-					}
-					case 10:
-					{	//TODO invert
-						context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA);	
-						break;
-					}
-					case 11:
-					{	//TODO alpha
-						context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA);	
-						break;
-					}
-					case 12:
-					{	//ERASE - проверить
-						context.setBlendFactors(Context3DBlendFactor.ZERO, Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA); 
-						break;
-					}
-					case 13:
-					{
-						//TODO overlay
-						context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA);	
-						break;
-					}
-					case 14:
-					{
-						//TODO hardlight
-						context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA);	
-						break;
-					}
-						
-					default:
-					{
-						context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA); 
-						break;
-					}
-				}
+				var blendMode:BlendMode = blendModes[currentDrawingList.blendMode];
+				context.setBlendFactors(blendMode.src, blendMode.dst);
+				
 				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 4, currentDrawingList.data, registersSize);
 				context.drawTriangles(drawingGeometry.indexBuffer, 0, trianglesNum);
 				
