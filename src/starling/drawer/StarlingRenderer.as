@@ -5,7 +5,6 @@ package starling.drawer
 	import flash.display3D.Context3DCompareMode;
 	import flash.display3D.Context3DProgramType;
 	import flash.display3D.Context3DTextureFilter;
-	import flash.display3D.Context3DTriangleFace;
 	import flash.display3D.Program3D;
 	import flash.display3D.textures.TextureBase;
 	import flash.geom.Matrix;
@@ -88,7 +87,7 @@ package starling.drawer
 		}
 		
 		[Inline]
-		public final function draw(texture:BaseSubTexture, matrix:Matrix, colorData:ColorData):void
+		public final function draw(texture:BaseSubTexture, matrix:Matrix, colorData:ColorData, blendMode:int = 0):void
 		{
 			var a:Number = matrix.a;
 			var b:Number = matrix.b;
@@ -107,15 +106,15 @@ package starling.drawer
 			}
 			
 			//TODO: менять лист ка ктолько поменяется текстура
-			var currentDrawingList:DrawingList = getDrawingList();
-			
-			if (currentDrawingList.isFull)
+			var currentDrawingList:DrawingList = getDrawingList();			
+			if (currentDrawingList.isFull || currentDrawingList.blendMode != blendMode)
 			{
 				drawingListSize++;
 				currentDrawingList = getDrawingList();
 			}
 			
 			currentDrawingList.addDrawingData(a, b, c, d, tx, ty, texture, colorData);
+			currentDrawingList.blendMode = blendMode;
 		}
 		
 		[Inline]
@@ -151,10 +150,11 @@ package starling.drawer
 		override public function render(support:RenderSupport, parentAlpha:Number):void 
 		{
 			var context:Context3D = Starling.context;
-			
 			//premultiplied because textures is BitmapData
-			//RenderSupport.setBlendFactors(true, blendMode); starling slow as 90 years old granny
-			context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA); //normal
+			//RenderSupport.setBlendFactors(true, blendmode);// starling slow as 90 years old granny
+			//context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA); //normal
+			
+			//context.setBlendFactors(Context3DBlendFactor.DESTINATION_COLOR, Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA); //normal
 			//context.setBlendFactors(Context3DBlendFactor.SOURCE_ALPHA, Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA); //layer
 			context.setProgram(_program3D);
 			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, support.mvpMatrix3D, true);
@@ -175,6 +175,90 @@ package starling.drawer
 				var registersSize:int = currentDrawingList.registersSize;
 				var trianglesNum:int = registersSize * triangleToRegisterRate;
 				
+				// TODO добавить по возможности все флэшёвые моды
+				switch(currentDrawingList.blendMode)
+				{
+					case 2:
+					{
+						// layer
+						context.setBlendFactors(Context3DBlendFactor.SOURCE_ALPHA, Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA); 
+						break;
+					}
+					case 3:
+					{
+						//MULTIPLY
+						context.setBlendFactors(Context3DBlendFactor.DESTINATION_COLOR, Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA ); 
+						break;
+					}
+					case 4:
+					{
+						//SCREEN
+						context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ONE_MINUS_SOURCE_COLOR );
+						break;
+					}
+					case 5:
+					{
+						//TODO lighten
+						context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA);	
+						break;
+					}
+					case 6:
+					{
+						//TODO darken
+						context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA);	
+						break;
+					}
+					case 7:
+					{
+						//TODO difference
+						context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA);	
+						break;
+					}
+					case 8:
+					{
+						//ADD
+						context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ONE); 
+						break;
+					}
+					case 9:
+					{	//TODO subtract
+						context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA);	
+						break;
+					}
+					case 10:
+					{	//TODO invert
+						context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA);	
+						break;
+					}
+					case 11:
+					{	//TODO alpha
+						context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA);	
+						break;
+					}
+					case 12:
+					{	//ERASE - проверить
+						context.setBlendFactors(Context3DBlendFactor.ZERO, Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA); 
+						break;
+					}
+					case 13:
+					{
+						//TODO overlay
+						context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA);	
+						break;
+					}
+					case 14:
+					{
+						//TODO hardlight
+						context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA);	
+						break;
+					}
+						
+					default:
+					{
+						context.setBlendFactors(Context3DBlendFactor.ONE, Context3DBlendFactor.ONE_MINUS_SOURCE_ALPHA); 
+						break;
+					}
+				}
 				context.setProgramConstantsFromVector(Context3DProgramType.VERTEX, 4, currentDrawingList.data, registersSize);
 				context.drawTriangles(drawingGeometry.indexBuffer, 0, trianglesNum);
 				

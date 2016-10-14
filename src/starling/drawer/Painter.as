@@ -212,7 +212,7 @@ package starling.drawer
 			
 			var color:ColorData = drawingData.colorData;
 			
-			target.draw(currentSubTexture, drawMatrix, color);
+			target.draw(currentSubTexture, drawMatrix, color, drawingData.blendMode);
 				
 			clearMaskData();
 			

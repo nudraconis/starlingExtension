@@ -13,6 +13,7 @@ package starling.drawer
 		public var registersSize:int = 0;
 		public var registersMaxSize:int = 0;
 		public var isFull:Boolean;
+		public var blendMode:int = 0;
 		
 		public function DrawingList(size:int, registersPerGeometry:int) 
 		{
