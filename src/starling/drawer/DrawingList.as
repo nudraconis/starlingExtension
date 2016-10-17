@@ -58,8 +58,6 @@ package starling.drawer
 			data[length++] = colorData.blueAdd * RGB_VALUE_TO_SHADER
 			data[length++] = colorData.alphaAdd * RGB_VALUE_TO_SHADER
 			
-			//trace(colorData.redAdd, colorData.greenAdd, colorData.blueAdd, colorData.alphaAdd);
-			
 			registersSize += registersPerGeometry;
 			
 			isFull = registersSize + registersPerGeometry > registersMaxSize;
