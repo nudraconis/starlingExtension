@@ -48,7 +48,7 @@ package starling.drawer
 		private var currentTexture:TextureBase = null;
 		private var currentSamplerData:SamplerData;
 		
-		private var useBlendModeRendering:Boolean = false;
+		private var useBlendModeRendering:Boolean = true;
 		
 		private var _smooth:Boolean = true;
 		
@@ -109,7 +109,7 @@ package starling.drawer
 			
 			//TODO: менять лист ка ктолько поменяется текстура
 			var currentDrawingList:DrawingList = getDrawingList();			
-			if (currentDrawingList.isFull || (currentDrawingList.blendMode != blendMode && blendMode && useBlendModeRendering))
+			if (currentDrawingList.isFull || (useBlendModeRendering && blendMode && currentDrawingList.blendMode != blendMode))
 			{
 				drawingListSize++;
 				currentDrawingList = getDrawingList();
