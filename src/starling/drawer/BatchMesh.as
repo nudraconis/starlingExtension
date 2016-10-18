@@ -6,6 +6,7 @@ package starling.drawer
 	
 	public class BatchMesh extends BaseMesh 
 	{
+		public var uploaded:Boolean;
 		public var orderBufferDataRaw:Vector.<Number> = new Vector.<Number>();
 		public var orderBuffer:VertexBuffer3D;
 		
@@ -46,6 +47,8 @@ package starling.drawer
 		override public function uploadToGpu(context3D:Context3D):void 
 		{
 			super.uploadToGpu(context3D);
+			
+			uploaded = true;
 			
 			var verticesCount:int = int(vertexDataRaw.length / 3);
 			
