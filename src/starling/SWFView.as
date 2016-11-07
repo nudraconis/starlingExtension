@@ -64,6 +64,8 @@ package starling
 			if (!drawer)
 				return;
 				
+			support.finishQuadBatch();
+				
 			viewData.update();
 			
 			_bounds.setTo(0, 0, 0, 0);
