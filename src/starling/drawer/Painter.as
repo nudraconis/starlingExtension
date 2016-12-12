@@ -211,8 +211,8 @@ package starling.drawer
 			var isMask:Boolean = drawingData.isMask;
 			
 			var color:ColorData = drawingData.colorData;
-			
-			target.draw(currentSubTexture, drawMatrix, color, drawingData.blendMode);
+			if (!isMask)
+				target.draw(currentSubTexture, drawMatrix, color, drawingData.blendMode);
 				
 			clearMaskData();
 			
