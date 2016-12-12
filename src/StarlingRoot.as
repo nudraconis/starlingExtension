@@ -26,7 +26,7 @@ package
 			for (var i:int = 0; i < library.spritesList.length; i++) 
 			{
 				
-				var view:AnimationRenderer = new AnimationRenderer();
+				var view:SWFView = new SWFView();
 				view.alphaThreshold = 0.1;
 				
 				view.x = (i % 10 ) * w + 100;
@@ -35,12 +35,7 @@ package
 				
 				var viewData:SpriteData = library.spritesList[0];
 				
-				var spriteAsTimeline:MovieClipData = viewData as MovieClipData;	
-				
-				if(spriteAsTimeline)
-					spriteAsTimeline.stop();
 				view.show(viewData, texture);
-				view.currentFrame = i;
 			}
 				
 			/*for (var i:int = 0; i < 250; i++) 
