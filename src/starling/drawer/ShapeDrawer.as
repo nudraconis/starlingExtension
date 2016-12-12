@@ -1,4 +1,4 @@
-package starling.drawer 
+package starling.drawer
 {
 	import flash.geom.Matrix;
 	import flash.geom.Point;
@@ -14,7 +14,7 @@ package starling.drawer
 	{
 		private var drawMatrix:Matrix = new Matrix();
 		
-		public function ShapeDrawer(atlas:BaseTextureAtlas, mousePoint:Point, target:StarlingRenderer) 
+		public function ShapeDrawer(atlas:BaseTextureAtlas, mousePoint:Point, target:StarlingRenderer)
 		{
 			super(mousePoint, target);
 			
@@ -26,7 +26,7 @@ package starling.drawer
 			textureAtlas = value;
 		}
 		
-		public override function draw(drawable:DisplayObjectData, drawingData:DrawingData):void 
+		public override function draw(drawable:DisplayObjectData, drawingData:DrawingData):void
 		{
 			_draw(drawable, drawingData);
 			
@@ -35,9 +35,9 @@ package starling.drawer
 			if (drawable.transform)
 			{
 				GeomMath.concatMatrices(drawMatrix, drawable.transform, drawMatrix);
-				//drawMatrix.concat(drawable.transform);
+					//drawMatrix.concat(drawable.transform);
 			}
-				
+			
 			GeomMath.concatMatrices(drawMatrix, drawingData.transform, drawMatrix);
 			//drawMatrix.concat(drawingData.transform);
 			

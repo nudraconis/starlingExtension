@@ -32,7 +32,7 @@ package
 	
 	public class TestExporingStarling extends Sprite 
 	{
-		private var fileName:String = "biker";
+		private var fileName:String = "testBitmap";
 		
 		private var fileContent:ByteArray;
 		private var swfDataParser:SwfDataParser;
@@ -52,7 +52,7 @@ package
 			
 			DebugCanvas.current = graphics;
 			
-			file = File.documentsDirectory.resolvePath(fileName + ".swf");
+			file = File.documentsDirectory.resolvePath("packer/swf/" + fileName + ".swf");
 			var t:Timer = new Timer(1000, 1);
 			t.addEventListener(TimerEvent.TIMER_COMPLETE, onStartParse);
 			t.start();
@@ -67,7 +67,16 @@ package
 		private function onStartParse(e:TimerEvent = null):void 
 		{
 			openAndLoadContent();
+			
 			parseSwfData();
+		
+			//loadAnimation();
+			//unpackData();
+		}
+		
+		private function onSwfParseComplete(e:Event):void 
+		{
+			trace("onSwfParseComplete");
 			packRectangles();
 			rebuildAtlas();
 			packData();
@@ -76,9 +85,6 @@ package
 			var t:Timer = new Timer(1000, 1);
 			t.addEventListener(TimerEvent.TIMER_COMPLETE, loadAnimation);
 			t.start();
-			
-			//loadAnimation();
-			//unpackData();
 		}
 		
 		private function browseContetn():void 
@@ -140,7 +146,7 @@ package
 		
 		private function saveAnimation():void
 		{
-			var file:File = File.documentsDirectory.resolvePath(fileName + ".animation");
+			var file:File = File.documentsDirectory.resolvePath("packer/packed/" + fileName + ".animation");
 			var fileStream:FileStream = new FileStream();
 			fileStream.open(file, FileMode.WRITE);
 			
@@ -162,7 +168,7 @@ package
 				fileContent.clear();
 				fileContent = null;
 			}
-			file = File.documentsDirectory.resolvePath(fileName + ".animation");
+			file = File.documentsDirectory.resolvePath("packer/packed/" + fileName + ".animation");
 			openAndLoadContent();
 			fileContent.position = 0;
 			fileContent.endian = Endian.LITTLE_ENDIAN;
@@ -220,6 +226,8 @@ package
 		private function parseSwfData():void 
 		{
 			swfDataParser = new SwfDataParser();
+			swfDataParser.addEventListener(Event.COMPLETE, onSwfParseComplete);
+			
 			swfDataParser.parseSwf(fileContent, false);
 			fileContent.clear();
 		}
@@ -233,5 +241,7 @@ package
 			fileStream.readBytes(fileContent, 0, fileStream.bytesAvailable);
 			fileStream.close();
 		}	
+		
+	
 	}
 }

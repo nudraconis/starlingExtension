@@ -17,7 +17,7 @@ package starling.drawer
 	import swfdata.atlas.BaseTextureAtlas;
 	
 	public class StarlingRenderer extends DisplayObject
-	{	
+	{
 		private static const DEFAULT_THRESHOLD:Number = 0.1;
 		private static const MAX_VERTEX_CONSTANTS:int = 128;//may change in different profiles
 		
@@ -30,15 +30,14 @@ package starling.drawer
 		
 		private static var blendModes:Vector.<BlendMode> = BlendMode.getBlendModesList();
 		
-		private var fragmentData:Vector.<Number> = new <Number>[
-																0, 0, 0, DEFAULT_THRESHOLD,	
-																
-																//1, 0, 0, 0,
-																//0, 1, 0, 0,
-																//0, 0, 1, 0,
-																//0, 0, 0, 1,
-																
-																0, 0, 0, 0.0001];
+		private var fragmentData:Vector.<Number> = new <Number>[0, 0, 0, DEFAULT_THRESHOLD,
+		
+		//1, 0, 0, 0,
+		//0, 1, 0, 0,
+		//0, 0, 1, 0,
+		//0, 0, 0, 1,
+		
+		0, 0, 0, 0.0001];
 		
 		public var atlas:BaseTextureAtlas;
 		
@@ -57,9 +56,9 @@ package starling.drawer
 			
 			currentSamplerData = new SamplerData();
 			
-			if(drawingGeometry.uploaded == false)
+			if (drawingGeometry.uploaded == false)
 				drawingGeometry.uploadToGpu(Starling.context);
-				
+			
 			Starling.current.enableErrorChecking = CONFIG::debug;
 			
 			getProgram();
@@ -69,9 +68,9 @@ package starling.drawer
 		{
 			if (_smooth == value)
 				return;
-				
+			
 			_smooth = value;
-			currentSamplerData.filter = _smooth == true? Context3DTextureFilter.LINEAR:Context3DTextureFilter.NEAREST;
+			currentSamplerData.filter = _smooth == true ? Context3DTextureFilter.LINEAR : Context3DTextureFilter.NEAREST;
 		}
 		
 		public function get smooth():Boolean
@@ -102,14 +101,14 @@ package starling.drawer
 			var pivotX:Number = texture.pivotX;
 			var pivotY:Number = texture.pivotY;
 			
-			if (pivotX != 0 || pivotY != 0) 
+			if (pivotX != 0 || pivotY != 0)
 			{
 				tx = tx - pivotX * a - pivotY * c;
 				ty = ty - pivotX * b - pivotY * d;
 			}
 			
 			//TODO: менять лист ка ктолько поменяется текстура
-			var currentDrawingList:DrawingList = getDrawingList();			
+			var currentDrawingList:DrawingList = getDrawingList();
 			if (currentDrawingList.isFull || currentDrawingList.blendMode != blendMode)
 			{
 				drawingListSize++;
@@ -135,7 +134,8 @@ package starling.drawer
 		}
 		
 		private static const rect:Rectangle = new Rectangle();
-		override public function getBounds(targetSpace:DisplayObject, resultRect:Rectangle = null):Rectangle 
+		
+		override public function getBounds(targetSpace:DisplayObject, resultRect:Rectangle = null):Rectangle
 		{
 			return rect;
 		}
@@ -145,12 +145,12 @@ package starling.drawer
 		{
 			if (currentTexture == texture)
 				return;
-				
+			
 			currentTexture = texture;
 			context3D.setTextureAt(0, currentTexture);
 		}
 		
-		override public function render(support:RenderSupport, parentAlpha:Number):void 
+		override public function render(support:RenderSupport, parentAlpha:Number):void
 		{
 			var context:Context3D = Starling.context;
 			//premultiplied because textures is BitmapData
@@ -162,18 +162,18 @@ package starling.drawer
 			context.setProgram(_program3D);
 			context.setProgramConstantsFromMatrix(Context3DProgramType.VERTEX, 0, support.mvpMatrix3D, true);
 			context.setProgramConstantsFromVector(Context3DProgramType.FRAGMENT, 0, fragmentData, 2);
-			context.setDepthTest(false, Context3DCompareMode.ALWAYS);
+			//context.setDepthTest(false, Context3DCompareMode.ALWAYS);
 			
 			drawingGeometry.setToContext(context);
-			currentSamplerData.apply(context, 0);
+			currentSamplerData.apply(context, 0); //TODO кещировать текущее выставленое состояние и выставлять только при изменении
 			
 			setTexture(atlas.gpuData, context);
-
+			
 			var triangleToRegisterRate:Number = 2 / registersPerGeometry;
 			var length:int = drawingListSize + 1;
 			
 			for (var i:int = 0; i < length; i++)
-			{	
+			{
 				var currentDrawingList:DrawingList = drawingList[i];
 				var registersSize:int = currentDrawingList.registersSize;
 				var trianglesNum:int = registersSize * triangleToRegisterRate;
@@ -203,64 +203,54 @@ package starling.drawer
 			_program3D = target.getProgram(programName);
 			
 			if (!_program3D)
-			{	
+			{
 				var vertexShader:String;
 				var fragmentShader:String;
 				
-				vertexShader =
-								"mov		vt0			va2									\n" +
-								"mov		vt0			va0									\n" +
-
-								"mul		vt1			va0.xy		vc[va2.x+1].zw			\n" +
-
-								"mul		vt2			vt1.xy		vc[va2.x].xy			\n" +
-								"add		vt2.x		vt2.x		vt2.y					\n" +
-								"add		vt2.x		vt2.x		vc[va2.x+1].x			\n" +
-
-								"mul		vt3			vt1.xy		vc[va2.x].zw			\n" +
-								"add		vt3.x		vt3.x		vt3.y					\n" +
-								"add		vt3.x		vt3.x		vc[va2.x+1].y			\n" +
-
-								"mov		vt2.y		vt3.x								\n" +
-
-								"mov		vt2.zw		vt0.zw								\n" +
-								
-								"m44		vt3			vt2			vc0						\n" +
-								
-								//"mov vt3.z		va2.y			\n" +
-								"mov		op			vt3									\n" +
-
-								"mul		vt0.xy		va1.xy		vc[va2.x+2].zw			\n" +
-								"add		vt0.xy		vt0.xy		vc[va2.x+2].xy			\n" +
-
-								"mov		v0			vt0									\n" +
-								"mov		v1			vc[va2.x+3]							\n" +
-								"mov		v2			vc[va2.x+4]";
-					
-				fragmentShader = 	"tex 	ft0			v0			fs0		<ignoresampler>	\n"	
+				vertexShader = "mov		vt0			va2									\n" + "mov		vt0			va0									\n" +
 				
-								+	"max	ft0			ft0			fc1						\n"
-								
-								+	"div	ft0.xyz		ft0.xyz		ft0.www					\n"
-								
-								//+	"m44	ft0			ft0			fc1						\n"
-								+	"mul	ft0			ft0			v1						\n"
-								+	"add	ft0			ft0			v2						\n"
-								
-								+	"mul	ft0.xyz		ft0.xyz		ft0.www					\n"
-								
-								+	"sub	ft1.w		ft0.w		fc0.w					\n"
-								+	"kil	ft1.w											\n"
-								
-								+	"mov	oc			ft0									  ";
-									
+				"mul		vt1			va0.xy		vc[va2.x+1].zw			\n" +
+				
+				"mul		vt2			vt1.xy		vc[va2.x].xy			\n" + "add		vt2.x		vt2.x		vt2.y					\n" + "add		vt2.x		vt2.x		vc[va2.x+1].x			\n" +
+				
+				"mul		vt3			vt1.xy		vc[va2.x].zw			\n" + "add		vt3.x		vt3.x		vt3.y					\n" + "add		vt3.x		vt3.x		vc[va2.x+1].y			\n" +
+				
+				"mov		vt2.y		vt3.x								\n" +
+				
+				"mov		vt2.zw		vt0.zw								\n" +
+				
+				"m44		vt3			vt2			vc0						\n" +
+				
+				//"mov vt3.z		va2.y			\n" +
+				"mov		op			vt3									\n" +
+				
+				"mul		vt0.xy		va1.xy		vc[va2.x+2].zw			\n" + "add		vt0.xy		vt0.xy		vc[va2.x+2].xy			\n" +
+				
+				"mov		v0			vt0									\n" + "mov		v1			vc[va2.x+3]							\n" + "mov		v2			vc[va2.x+4]";
+				
+				fragmentShader = "tex 	ft0			v0			fs0		<ignoresampler>	\n"
+				
+				+ "max	ft0			ft0			fc1						\n"
+				
+				+ "div	ft0.xyz		ft0.xyz		ft0.www					\n"
+				
+				//+	"m44	ft0			ft0			fc1						\n"
+				+ "mul	ft0			ft0			v1						\n" + "add	ft0			ft0			v2						\n"
+				
+				+ "mul	ft0.xyz		ft0.xyz		ft0.www					\n"
+				
+				+ "sub	ft1.w		ft0.w		fc0.w					\n" + "kil	ft1.w											\n"
+				
+				+ "mov	oc			ft0									  ";
+				
 				_program3D = target.registerProgramFromSource(programName, vertexShader, fragmentShader);
 			}
 			
 			return _program3D;
 		}
 		
-		override public function dispose():void {
+		override public function dispose():void
+		{
 			atlas = null;
 			super.dispose();
 		}
