@@ -121,8 +121,8 @@ package starling.drawer
 				currentDrawingList = getDrawingList();
 				currentDrawingList.blendMode = blendMode;
 			}
-			colorData.alphaMultiplier = this.alpha * _parentAlpha;
-			currentDrawingList.addDrawingData(a, b, c, d, tx, ty, texture, colorData);
+			var alphaMultiplier:Number =  this.alpha * _parentAlpha;
+			currentDrawingList.addDrawingData(a, b, c, d, tx, ty, texture, colorData, alphaMultiplier);
 			//if (blendMode)
 			//	currentDrawingList.blendMode = blendMode;
 		}

@@ -31,7 +31,7 @@ package starling.drawer
 		}
 		
 		[Inline]
-		public final function addDrawingData(a:Number, b:Number, c:Number, d:Number, tx:Number, ty:Number, texture:BaseSubTexture, colorData:ColorData):void
+		public final function addDrawingData(a:Number, b:Number, c:Number, d:Number, tx:Number, ty:Number, texture:BaseSubTexture, colorData:ColorData, alphaMultiplier:Number = 1):void
 		{
 			data[length++] = a;
 			data[length++] = c;
@@ -51,7 +51,7 @@ package starling.drawer
 			data[length++] = colorData.redMultiplier;
 			data[length++] = colorData.greenMultiplier;
 			data[length++] = colorData.blueMultiplier;
-			data[length++] = colorData.alphaMultiplier;
+			data[length++] = colorData.alphaMultiplier * alphaMultiplier;
 			
 			data[length++] = colorData.redAdd * RGB_VALUE_TO_SHADER;
 			data[length++] = colorData.greenAdd * RGB_VALUE_TO_SHADER
