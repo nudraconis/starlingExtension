@@ -2,7 +2,6 @@ package
 {
 	import flash.geom.Matrix;
 	
-	import starling.AnimationRenderer;
 	import starling.SWFView;
 	import starling.display.Sprite;
 	
