@@ -9,9 +9,11 @@ package starling.drawer
 	import flash.display3D.textures.TextureBase;
 	import flash.geom.Matrix;
 	import flash.geom.Rectangle;
+	
 	import starling.core.RenderSupport;
 	import starling.core.Starling;
 	import starling.display.DisplayObject;
+	
 	import swfdata.ColorData;
 	import swfdata.atlas.BaseSubTexture;
 	import swfdata.atlas.BaseTextureAtlas;
@@ -52,6 +54,7 @@ package starling.drawer
 		private var useBlendModeRendering:Boolean = true;
 		
 		private var _smooth:Boolean = true;
+		protected var _parentAlpha:Number = 1;
 		
 		public function StarlingRenderer()
 		{
@@ -118,7 +121,7 @@ package starling.drawer
 				currentDrawingList = getDrawingList();
 				currentDrawingList.blendMode = blendMode;
 			}
-			
+			colorData.alphaMultiplier = this.alpha * _parentAlpha;
 			currentDrawingList.addDrawingData(a, b, c, d, tx, ty, texture, colorData);
 			//if (blendMode)
 			//	currentDrawingList.blendMode = blendMode;
@@ -156,6 +159,8 @@ package starling.drawer
 		
 		override public function render(support:RenderSupport, parentAlpha:Number):void 
 		{
+			//_parentAlpha = parentAlpha;
+			
 			var context:Context3D = Starling.context;
 			//premultiplied because textures is BitmapData
 			//RenderSupport.setBlendFactors(true, blendmode);// starling slow as 90 years old granny
@@ -179,6 +184,7 @@ package starling.drawer
 			for (var i:int = 0; i < length; i++)
 			{	
 				var currentDrawingList:DrawingList = drawingList[i];
+				if(!currentDrawingList) return;
 				var registersSize:int = currentDrawingList.registersSize;
 				var trianglesNum:int = registersSize * triangleToRegisterRate;
 				

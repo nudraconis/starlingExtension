@@ -63,7 +63,7 @@ package starling
 		{
 			if (!drawer)
 				return;
-				
+			_parentAlpha = parentAlpha;	
 			support.finishQuadBatch();
 				
 			viewData.update();
