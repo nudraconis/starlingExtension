@@ -9,6 +9,7 @@ package starling
 	import starling.drawer.StarlingRenderer;
 	import swfdata.SpriteData;
 	import swfdata.atlas.gl.GLTextureAtlas;
+	import swfdata.ColorData;
 	
 	public class SWFView extends StarlingRenderer 
 	{
@@ -19,6 +20,7 @@ package starling
 		private var _bounds:Rectangle = new Rectangle();
 		
 		protected var viewData:SpriteData;
+		private var _colorData:ColorData = new ColorData();
 		
 		public function SWFView() 
 		{
@@ -63,7 +65,6 @@ package starling
 		{
 			if (!drawer)
 				return;
-			_parentAlpha = parentAlpha;	
 			support.finishQuadBatch();
 				
 			viewData.update();
@@ -74,8 +75,9 @@ package starling
 			//mousePoint.y = transform.ty + 10;
 			//DebugCanvas.current.clear();
 			
-			//drawer.checkMouseHit = drawer.checkBounds = drawer.debugDraw = true;
-			drawer.drawDisplayObject(viewData, transform, _bounds);
+			drawer.checkMouseHit = drawer.checkBounds = true;
+			_colorData.alphaMultiplier = this.alpha * parentAlpha;
+			drawer.drawDisplayObject(viewData, transform, _bounds, _colorData);
 			
 			super.render(support, parentAlpha);
 		}

@@ -54,7 +54,6 @@ package starling.drawer
 		private var useBlendModeRendering:Boolean = true;
 		
 		private var _smooth:Boolean = true;
-		protected var _parentAlpha:Number = 1;
 		
 		public function StarlingRenderer()
 		{
@@ -121,8 +120,7 @@ package starling.drawer
 				currentDrawingList = getDrawingList();
 				currentDrawingList.blendMode = blendMode;
 			}
-			var alphaMultiplier:Number =  this.alpha * _parentAlpha;
-			currentDrawingList.addDrawingData(a, b, c, d, tx, ty, texture, colorData, alphaMultiplier);
+			currentDrawingList.addDrawingData(a, b, c, d, tx, ty, texture, colorData);
 			//if (blendMode)
 			//	currentDrawingList.blendMode = blendMode;
 		}
@@ -158,9 +156,7 @@ package starling.drawer
 		}
 		
 		override public function render(support:RenderSupport, parentAlpha:Number):void 
-		{
-			//_parentAlpha = parentAlpha;
-			
+		{	
 			var context:Context3D = Starling.context;
 			//premultiplied because textures is BitmapData
 			//RenderSupport.setBlendFactors(true, blendmode);// starling slow as 90 years old granny
